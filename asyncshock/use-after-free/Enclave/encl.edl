@@ -1,0 +1,14 @@
+enclave {
+	trusted {
+        
+        public void ecall_test();
+        public void ecall_setup(); 
+        public void ecall_print_and_save_arg_once([in,string] char *str);
+    };
+	
+	untrusted {
+        void ocall_print([in,string] const char *str);
+        
+
+	};
+};
