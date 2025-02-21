@@ -2,6 +2,8 @@
 #include <stdlib.h>  // For malloc and free
 #include <string.h>  // For memcpy
 #include <stdio.h>
+#include "encl_t.h"  // Include this to get OCall declarations
+
 
 
 char *glob_str_ptr;

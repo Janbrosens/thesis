@@ -1,0 +1,16 @@
+enclave {
+  
+
+    trusted {
+        public void ecall_ping();
+        public void ecall_pong();
+    };
+
+    untrusted {
+        void ocall_print([in,string] const char *str);
+        void sgx_thread_wait_untrusted_event_ocall();
+        void sgx_thread_set_untrusted_event_ocall();
+        void sgx_thread_setwait_untrusted_events_ocall();
+        void sgx_thread_set_multiple_untrusted_events_ocall();
+    };
+};
