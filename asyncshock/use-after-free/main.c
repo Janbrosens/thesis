@@ -18,6 +18,7 @@
 #include <sgx_urts.h>
 #include "Enclave/encl_u.h"
 
+#define DO_TIMER_STEP      0
 
 //These are global variables (see memcmp)
 int irq_cnt = 0, do_irq = 0, fault_cnt = 0, trigger_cnt = 0, step_cnt = 0;
@@ -46,9 +47,20 @@ void ocall_print(const char *str)
 // Called upon SIGSEGV caused by untrusted page tables. 
 void fault_handler(int signo, siginfo_t * si, void  *ctx)
 {
+    //printf("%s", trigger_adrs);
+    //info("Caught page fault (base address=%p)", si->si_addr);
+    //printf("mynameisjef");
 
-    info("mynameisjef");
 
+    void *fault_page = (void *)((uintptr_t)si->si_addr & ~(sysconf(_SC_PAGESIZE) - 1));
+    info("Caught page fault with fault address: %p, Adjusted page start: %p\n", si->si_addr, fault_page);
+
+
+    if (mprotect(fault_page, 4096, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
+        perror("mprotect failed");
+    }
+
+    
     ucontext_t *uc = (ucontext_t *) ctx;
 
     switch ( signo )
@@ -74,7 +86,7 @@ void fault_handler(int signo, siginfo_t * si, void  *ctx)
         }
         else
         {
-            info("Unknown #PF address!");
+            //info("Unknown #PF address!");
         }
     
         break;
@@ -97,32 +109,77 @@ void fault_handler(int signo, siginfo_t * si, void  *ctx)
 
     // NOTE: return eventually continues at aep_cb_func and initiates
     // single-stepping mode.
+    
 }
+
+
+
+/* ================== ATTACKER INIT/SETUP ================= */
+
+void register_signal_handler(int signo)
+{
+    struct sigaction act, old_act;
+
+    /* Specify #PF handler with signinfo arguments */
+    memset(&act, 0, sizeof(sigaction));
+    act.sa_sigaction = fault_handler;
+    act.sa_flags = SA_RESTART | SA_SIGINFO;
+
+    /* Block all signals while the signal is being handled */
+    sigfillset(&act.sa_mask);
+    ASSERT(!sigaction( signo, &act, &old_act ));
+}
+
+/* Configure and check attacker untrusted runtime environment. */
+void attacker_config_runtime(void)
+{
+    ASSERT( !claim_cpu(VICTIM_CPU) );
+    //ASSERT( !prepare_system_for_benchmark(PSTATE_PCT) ); // => throws error
+    print_system_settings();
+
+    register_enclave_info();
+    print_enclave_info();
+    register_signal_handler( SIGSEGV );
+}
+
+
+
+
 
 int main( int argc, char **argv )
 {
 
-    //code to get the address and page of the free() function, which permissions we will revoke like in the example in the paper
-
-    void *free_addr = (void *)free;  // Get address of free()
-    
-    // Align address to page size
-    size_t page_size = sysconf(_SC_PAGESIZE);
-    void *page_start = (void *)((size_t)free_addr & ~(page_size - 1));
-
-    printf("free() address: %p, page start: %p\n", free_addr, page_start);
-
-    // revoke execute permission on free()
-    mprotect(page_start, page_size, PROT_READ | PROT_WRITE);
-
-
-    //TODO register signal handler
+   
 
 
 
-    
+    //Create Enclave
     sgx_enclave_id_t eid = create_enclave();
     int rv = 1, secret = 1;
+
+    /* 1. Setup attack execution environment. */
+    attacker_config_runtime();
+
+
+    //code to get the address and page of the free() function, which permissions we will revoke like in the example in the paper
+    void *free_addr = (void *)free;  // Get address of free()
+    // Align address to page size
+    
+    
+    size_t page_size = sysconf(_SC_PAGESIZE);
+    void *page_start = (void *)((size_t)free_addr & ~(4096 - 1));
+    printf("free() address: %p, page start: %p\n", free_addr, page_start);
+
+
+    // revoke execute permission on free()
+
+
+    if (mprotect(page_start, page_size, PROT_READ | PROT_WRITE) != 0) {
+        perror("mprotect failed");
+    }
+
+
+
 
     ecall_test(eid);
 
