@@ -2,12 +2,15 @@ enclave {
 	trusted {
         
         public void ecall_test();
+        public void *ecall_get_test_dummy_adrs();
         public void ecall_setup(); 
         public void ecall_print_and_save_arg_once([in,string] char *str);
+
     };
 	
 	untrusted {
         void ocall_print([in,string] const char *str);
+        void ocall_print_address([in, string] const char *p);
         
 
 	};

@@ -12,6 +12,15 @@ int other_functions(const char *c) {
     /* do other things */
 }
 
+int test_dummy(){
+    return 0;
+}
+
+void *ecall_get_test_dummy_adrs(void)
+{
+    return test_dummy;    
+}
+
 int puts(const char *c) {  
     ocall_print(c);  
     return 0;  
@@ -31,11 +40,17 @@ void ecall_test(){
 
 void ecall_setup() {  
     glob_str_ptr = malloc(sizeof(struct my_func_ptr));  
+    ocall_print_address((char*)glob_str_ptr);
+
 }
 
 void ecall_print_and_save_arg_once(char *str) {  
-    struct my_func_ptr *mfp = malloc(sizeof(struct my_func_ptr));  
+    struct my_func_ptr *mfp = malloc(sizeof(struct my_func_ptr));
     mfp->my_puts = puts;  
+
+    ocall_print_address((char*)mfp);
+
+    ocall_print_address((char*)glob_str_ptr);
 
     //TEST
     char* test = str;
@@ -43,12 +58,25 @@ void ecall_print_and_save_arg_once(char *str) {
 
     if (glob_str_ptr != NULL) {  
 
-        ocall_print(test);
+        //ocall_print(test);
         
         memcpy(glob_str_ptr, (char *)str, sizeof(glob_str_ptr));  
         glob_str_ptr[sizeof(glob_str_ptr)] = '\0';  
         mfp->my_puts(glob_str_ptr);  
-        free(glob_str_ptr);  
+
+        ocall_print("test"); //PROBLEM ocalls (prints) are not done for thread B
+
+        free(glob_str_ptr);
+        
+        //ocall_print("test");
+        //for testing, extra helper function where page access can be revoked from
+        //strchr -> didnt work to edit perm
+        // ocall_print("pf after free"); same
+        // test_dummy works (see RSA example)
+        test_dummy();
+
+        //ocall_print(str);
+
         glob_str_ptr = NULL;  
     }  
     free(mfp);  

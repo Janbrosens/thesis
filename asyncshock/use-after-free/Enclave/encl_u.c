@@ -1,6 +1,10 @@
 #include "encl_u.h"
 #include <errno.h>
 
+typedef struct ms_ecall_get_test_dummy_adrs_t {
+	void* ms_retval;
+} ms_ecall_get_test_dummy_adrs_t;
+
 typedef struct ms_ecall_print_and_save_arg_once_t {
 	char* ms_str;
 	size_t ms_str_len;
@@ -10,6 +14,10 @@ typedef struct ms_ocall_print_t {
 	const char* ms_str;
 } ms_ocall_print_t;
 
+typedef struct ms_ocall_print_address_t {
+	const char* ms_p;
+} ms_ocall_print_address_t;
+
 static sgx_status_t SGX_CDECL encl_ocall_print(void* pms)
 {
 	ms_ocall_print_t* ms = SGX_CAST(ms_ocall_print_t*, pms);
@@ -18,13 +26,22 @@ static sgx_status_t SGX_CDECL encl_ocall_print(void* pms)
 	return SGX_SUCCESS;
 }
 
+static sgx_status_t SGX_CDECL encl_ocall_print_address(void* pms)
+{
+	ms_ocall_print_address_t* ms = SGX_CAST(ms_ocall_print_address_t*, pms);
+	ocall_print_address(ms->ms_p);
+
+	return SGX_SUCCESS;
+}
+
 static const struct {
 	size_t nr_ocall;
-	void * table[1];
+	void * table[2];
 } ocall_table_encl = {
-	1,
+	2,
 	{
 		(void*)encl_ocall_print,
+		(void*)encl_ocall_print_address,
 	}
 };
 sgx_status_t ecall_test(sgx_enclave_id_t eid)
@@ -34,10 +51,19 @@ sgx_status_t ecall_test(sgx_enclave_id_t eid)
 	return status;
 }
 
+sgx_status_t ecall_get_test_dummy_adrs(sgx_enclave_id_t eid, void** retval)
+{
+	sgx_status_t status;
+	ms_ecall_get_test_dummy_adrs_t ms;
+	status = sgx_ecall(eid, 1, &ocall_table_encl, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
 sgx_status_t ecall_setup(sgx_enclave_id_t eid)
 {
 	sgx_status_t status;
-	status = sgx_ecall(eid, 1, &ocall_table_encl, NULL);
+	status = sgx_ecall(eid, 2, &ocall_table_encl, NULL);
 	return status;
 }
 
@@ -47,7 +73,7 @@ sgx_status_t ecall_print_and_save_arg_once(sgx_enclave_id_t eid, char* str)
 	ms_ecall_print_and_save_arg_once_t ms;
 	ms.ms_str = str;
 	ms.ms_str_len = str ? strlen(str) + 1 : 0;
-	status = sgx_ecall(eid, 2, &ocall_table_encl, &ms);
+	status = sgx_ecall(eid, 3, &ocall_table_encl, &ms);
 	return status;
 }
 
