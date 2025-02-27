@@ -2,7 +2,9 @@ enclave {
 	trusted {
         
         public void ecall_test();
+        public void ecall_test_malloc_free();
         public void *ecall_get_test_dummy_adrs();
+        public void *ecall_get_succes_adrs();
         public void ecall_setup(); 
         public void ecall_print_and_save_arg_once([in,string] char *str);
 
@@ -10,8 +12,7 @@ enclave {
 	
 	untrusted {
         void ocall_print([in,string] const char *str);
-        void ocall_print_address( uint64_t a);
-        void ocall_free(uint64_t p);
+        void ocall_print_address([in,string] const char *str, uint64_t a);
         
 
 	};
