@@ -15,8 +15,12 @@ typedef struct ms_ocall_print_t {
 } ms_ocall_print_t;
 
 typedef struct ms_ocall_print_address_t {
-	const char* ms_p;
+	uint64_t ms_a;
 } ms_ocall_print_address_t;
+
+typedef struct ms_ocall_free_t {
+	uint64_t ms_p;
+} ms_ocall_free_t;
 
 static sgx_status_t SGX_CDECL encl_ocall_print(void* pms)
 {
@@ -29,19 +33,28 @@ static sgx_status_t SGX_CDECL encl_ocall_print(void* pms)
 static sgx_status_t SGX_CDECL encl_ocall_print_address(void* pms)
 {
 	ms_ocall_print_address_t* ms = SGX_CAST(ms_ocall_print_address_t*, pms);
-	ocall_print_address(ms->ms_p);
+	ocall_print_address(ms->ms_a);
+
+	return SGX_SUCCESS;
+}
+
+static sgx_status_t SGX_CDECL encl_ocall_free(void* pms)
+{
+	ms_ocall_free_t* ms = SGX_CAST(ms_ocall_free_t*, pms);
+	ocall_free(ms->ms_p);
 
 	return SGX_SUCCESS;
 }
 
 static const struct {
 	size_t nr_ocall;
-	void * table[2];
+	void * table[3];
 } ocall_table_encl = {
-	2,
+	3,
 	{
 		(void*)encl_ocall_print,
 		(void*)encl_ocall_print_address,
+		(void*)encl_ocall_free,
 	}
 };
 sgx_status_t ecall_test(sgx_enclave_id_t eid)

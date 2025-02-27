@@ -56,9 +56,14 @@ void ocall_print(const char *str)
     info("ocall_print: enclave says: '%s'", str);
 }
 
-void ocall_print_address(const char *p)
+void ocall_print_address(uint64_t a)
 {
-    info("ocall_print_address: enclave says: '%p'", p);
+    info("ocall_print_address: enclave says: '%p'", (void*)a);
+}
+
+void ocall_free(uint64_t p)
+{
+    free((void*) p );
 }
 
 
@@ -70,10 +75,20 @@ void fault_handler(int signo, siginfo_t * si, void  *ctx)
     //printf("%s", trigger_adrs);
     //info("Caught page fault (base address=%p)", si->si_addr);
     //printf("mynameisjef");
-
-
     void *fault_page = (void *)((uintptr_t)si->si_addr & ~(4096 - 1));
-    info("Caught page fault with fault address: %p, Adjusted page start: %p\n", si->si_addr, fault_page);
+
+    switch (signo) {
+        case SIGSEGV:
+            info("[Thread %lu] Caught page fault with fault address: %p, Adjusted page start: %p\n", pthread_self(), si->si_addr, fault_page);
+            break;
+
+        default:
+            info("Caught unknown signal '%d'", signo);
+            abort();
+    }
+
+    
+   
 
 
 
@@ -104,7 +119,7 @@ void fault_handler(int signo, siginfo_t * si, void  *ctx)
 
     
     
-
+    /*
     //Revoke access rights on test_dummy after caught page fault on free 
     if(fault_page == free_page_start){
         if (mprotect(free_page_start, 4096, PROT_READ | PROT_EXEC) != 0) {
@@ -116,9 +131,11 @@ void fault_handler(int signo, siginfo_t * si, void  *ctx)
         // revoke execute permission on test_dummy()
         if (mprotect(test_dummy_page_start, 4096, PROT_NONE) != 0) {
             perror("mprotect failed");
+        }else{
+            printf("access rights revoked on test_dummy\n");
         }
     
-    }
+    }*/
 
     
 
@@ -126,17 +143,34 @@ void fault_handler(int signo, siginfo_t * si, void  *ctx)
     // TODO here we also have to change thread!
     if(fault_page == test_dummy_page_start){
 
+        printf("jef\n");
+
+        
         if (mprotect(test_dummy_page_start, 4096, PROT_READ | PROT_EXEC) != 0) {
             perror("mprotect failed");
         }else{
             printf("access rights restored on test_dummy\n");
         }
-
+        
+        /*
+        if (mprotect(free_page_start, 4096, PROT_NONE) != 0) {
+            perror("mprotect failed");
+        }else{
+            printf("access rights revoked on free\n");
+        }*/
+        
         pthread_mutex_lock(&lock);
+
         turn = 0; // set turn to thread A  
         pthread_cond_signal(&cond); // Wake up thread_A
-        pthread_cond_wait(&cond, &lock);
+        while(turn != 1){
+            pthread_cond_wait(&cond, &lock);
+        }
         pthread_mutex_unlock(&lock); //end turn of thread B
+        
+        //pthread_exit(NULL);
+
+        
     }
 
 
@@ -234,25 +268,26 @@ void attacker_config_runtime(void)
 // Function for thread A
 void* thread_A(void* arg) {
 
-    printf("threadA\n");
+    printf("threadA running\n");
 
-    sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
     pthread_mutex_lock(&lock);
 
     while (turn != 0) { // Wait until it's thread_A's turn
         pthread_cond_wait(&cond, &lock);
     }
 
-    void *test_dummy_page_start = (void *)((size_t)td_pt & ~(4096 - 1));
-
-   
-   
-    //printf("test\n");
-   
-    char* str = "dag michel jong";
-    ecall_print_and_save_arg_once(eidarg, str); // Enter enclave and print "Ping"
-
     pthread_mutex_unlock(&lock);
+
+
+    //void *test_dummy_page_start = (void *)((size_t)td_pt & ~(4096 - 1));
+    //printf("test\n");
+    sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
+
+    char* str = "dag michel jong";
+    printf("threadA entering enclave\n");
+
+    ecall_print_and_save_arg_once(eidarg, str); // Enter enclave 
+    printf("threadA finished");
 }
 
 // Function for thread B
@@ -261,7 +296,21 @@ void* thread_B(void* arg) {
 
     char* str = "japers";
 
-    printf("threadB\n");
+    printf("threadB running\n");
+
+     // revoke execute permission on free()
+    //code to get the address and page of the free() function, which permissions we will revoke like in the example in the paper
+    void *free_addr = (void *)free;  // Get address of free()
+    // Align address to page size
+    void *free_page_start = (void *)((size_t)free_addr & ~(4096 - 1));
+
+    void *test_dummy_page_start = (void *)((size_t)td_pt & ~(4096 - 1));
+     if (mprotect(test_dummy_page_start, 4096, PROT_NONE) != 0) {
+        perror("mprotect failed");
+    }else{
+        printf("access rights revoked on free\n");
+    }
+
     ecall_print_and_save_arg_once(eidarg, str);
 
 }
@@ -270,10 +319,6 @@ void* thread_B(void* arg) {
 
 int main( int argc, char **argv )
 {
-
-   
-
-
 
     //Create Enclave
     sgx_enclave_id_t eid = create_enclave();
@@ -284,6 +329,8 @@ int main( int argc, char **argv )
     char* str = "dryrun";
     ecall_print_and_save_arg_once(eid, str);
 
+    // Do setup again
+    ecall_setup(eid);
     /* 1. Setup attack execution environment. */
     attacker_config_runtime();
 
@@ -302,11 +349,6 @@ int main( int argc, char **argv )
 
     
 
-    // revoke execute permission on free()
-    if (mprotect(free_page_start, 4096, PROT_READ | PROT_WRITE) != 0) {
-        perror("mprotect failed");
-    }
-
 
 
     // ECALL setup is done before threads are created
@@ -318,7 +360,7 @@ int main( int argc, char **argv )
     pthread_create(&t2, NULL, thread_B, (void*)&eid);
 
     pthread_join(t1, NULL);
-    //pthread_join(t2, NULL); -> dont wait on thread B to finish because it does not
+    //pthread_join(t2, NULL); //-> dont wait on thread B to finish because it does not
 
 
     //char* str = "japers";
@@ -331,7 +373,7 @@ int main( int argc, char **argv )
     //ecall_print_and_save_arg_once(eid, str);
 
     info_event("destroying SGX enclave");
-    SGX_ASSERT( sgx_destroy_enclave( eid ) );
+    //SGX_ASSERT( sgx_destroy_enclave( eid ) );
 
     info("all is well; exiting..");
 	return 0;

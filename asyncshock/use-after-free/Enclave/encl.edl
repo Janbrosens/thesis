@@ -10,7 +10,8 @@ enclave {
 	
 	untrusted {
         void ocall_print([in,string] const char *str);
-        void ocall_print_address([in, string] const char *p);
+        void ocall_print_address( uint64_t a);
+        void ocall_free(uint64_t p);
         
 
 	};

@@ -21,7 +21,8 @@ void ecall_setup(void);
 void ecall_print_and_save_arg_once(char* str);
 
 sgx_status_t SGX_CDECL ocall_print(const char* str);
-sgx_status_t SGX_CDECL ocall_print_address(const char* p);
+sgx_status_t SGX_CDECL ocall_print_address(uint64_t a);
+sgx_status_t SGX_CDECL ocall_free(uint64_t p);
 
 #ifdef __cplusplus
 }
