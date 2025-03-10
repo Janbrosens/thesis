@@ -84,11 +84,9 @@ void ecall_test_malloc_free(){
 }
 
 // Function that is called if exploit is succesfull
-void succes(){
+void success(){
     ocall_print("☠️  SYSTEM HACKED ☠️");
 }
-
-
 
 char *glob_str_ptr;
 
@@ -106,7 +104,7 @@ void *ecall_get_test_dummy_adrs()
 
 void *ecall_get_succes_adrs()
 {
-    return succes;    
+    return success;    
 }
 
 
@@ -133,18 +131,19 @@ void ecall_setup() {
 }
 
 
-void ecall_print_and_save_arg_once(char *str) {  
-    
+void ecall_print_and_save_arg_once(uint64_t str) {  
+    ocall_print_address("str", str);
+
     struct my_func_ptr *mfp = my_malloc(sizeof(struct my_func_ptr));
     mfp->my_puts = puts;  
 
     ocall_print_address("glob str ptr", (uint64_t)glob_str_ptr);
     ocall_print_address("mfp",(uint64_t)mfp);
-    ocall_print_address("succes func",(uint64_t) (void*)succes);
+    ocall_print_address("succes func",(uint64_t) (void*)success);
 
     if (glob_str_ptr != NULL) {  
         
-        memcpy(glob_str_ptr, (char *)str, sizeof(glob_str_ptr));  
+        memcpy(glob_str_ptr,(char*) str, sizeof(glob_str_ptr));  
         glob_str_ptr[sizeof(glob_str_ptr)] = '\0';  
 
         ocall_print_address("mfp->myputs",(uint64_t) mfp->my_puts); 

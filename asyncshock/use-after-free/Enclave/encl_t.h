@@ -20,7 +20,7 @@ void ecall_test_malloc_free(void);
 void* ecall_get_test_dummy_adrs(void);
 void* ecall_get_succes_adrs(void);
 void ecall_setup(void);
-void ecall_print_and_save_arg_once(char* str);
+void ecall_print_and_save_arg_once(uint64_t str);
 
 sgx_status_t SGX_CDECL ocall_print(const char* str);
 sgx_status_t SGX_CDECL ocall_print_address(const char* str, uint64_t a);

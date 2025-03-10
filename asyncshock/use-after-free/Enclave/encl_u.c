@@ -10,8 +10,7 @@ typedef struct ms_ecall_get_succes_adrs_t {
 } ms_ecall_get_succes_adrs_t;
 
 typedef struct ms_ecall_print_and_save_arg_once_t {
-	char* ms_str;
-	size_t ms_str_len;
+	uint64_t ms_str;
 } ms_ecall_print_and_save_arg_once_t;
 
 typedef struct ms_ocall_print_t {
@@ -88,12 +87,11 @@ sgx_status_t ecall_setup(sgx_enclave_id_t eid)
 	return status;
 }
 
-sgx_status_t ecall_print_and_save_arg_once(sgx_enclave_id_t eid, char* str)
+sgx_status_t ecall_print_and_save_arg_once(sgx_enclave_id_t eid, uint64_t str)
 {
 	sgx_status_t status;
 	ms_ecall_print_and_save_arg_once_t ms;
 	ms.ms_str = str;
-	ms.ms_str_len = str ? strlen(str) + 1 : 0;
 	status = sgx_ecall(eid, 5, &ocall_table_encl, &ms);
 	return status;
 }

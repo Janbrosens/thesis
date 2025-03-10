@@ -30,7 +30,7 @@ sgx_status_t ecall_test_malloc_free(sgx_enclave_id_t eid);
 sgx_status_t ecall_get_test_dummy_adrs(sgx_enclave_id_t eid, void** retval);
 sgx_status_t ecall_get_succes_adrs(sgx_enclave_id_t eid, void** retval);
 sgx_status_t ecall_setup(sgx_enclave_id_t eid);
-sgx_status_t ecall_print_and_save_arg_once(sgx_enclave_id_t eid, char* str);
+sgx_status_t ecall_print_and_save_arg_once(sgx_enclave_id_t eid, uint64_t str);
 
 #ifdef __cplusplus
 }

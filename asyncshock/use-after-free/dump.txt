@@ -44,84 +44,62 @@ make[1]: Leaving directory '/home/jan/asyncshock/use-after-free/Enclave'
 [main.c] Creating enclave...
 --------------------------------------------------------------------------------
 
-[main.c] ocall_print_address: enclave says: 'Allocated A at ' '0x7f072581a1a0'
-[main.c] ocall_print_address: enclave says: 'Allocated B at ' '0x7f072581a208'
-[main.c] ocall_print_address: enclave says: 'Allocated C (should reuse A) at ' '0x7f072581a1a0'
-[main.c] ocall_print_address: enclave says: 'Allocated D (should reuse B) at ' '0x7f072581a208'
-[main.c] ocall_print: enclave says: ''
-[main.c] ocall_print: enclave says: '----- TEST DONE -----'
-[main.c] ocall_print: enclave says: ''
-[main.c] ocall_print_address: enclave says: 'glob str ptr' '0x7f072581a270'
-[main.c] ocall_print_address: enclave says: 'glob str ptr' '0x7f072581a270'
-[main.c] ocall_print_address: enclave says: 'mfp' '0x7f072581a280'
-[main.c] ocall_print_address: enclave says: 'succes func' '0x7f0725802063'
-[main.c] ocall_print_address: enclave says: 'str' '0x7f072582c010'
-[main.c] ocall_print: enclave says: 'test'
-[main.c] ocall_print_address: enclave says: 'glob str ptr' '0x7f072581a270'
-[main.c] ocall_print_address: enclave says: 'mfp->myputs' '0x7f0725802073'
-[main.c] ocall_print_address: enclave says: 'puts' '0x7f0725802073'
+[main.c] ocall_print_address: enclave says: 'glob str ptr' '0x7f758841a1a0'
+[main.c] ocall_print_address: enclave says: 'str' '0x561cd9e13347'
+[main.c] ocall_print_address: enclave says: 'glob str ptr' '0x7f758841a1a0'
+[main.c] ocall_print_address: enclave says: 'mfp' '0x7f758841a1b0'
+[main.c] ocall_print_address: enclave says: 'succes func' '0x7f7588402063'
+[main.c] ocall_print_address: enclave says: 'mfp->myputs' '0x7f7588402073'
+[main.c] ocall_print_address: enclave says: 'puts' '0x7f7588402073'
 [main.c] ocall_print: enclave says: 'dryrun'
-[main.c] ocall_print: enclave says: 'test2'
 [main.c] ocall_print: enclave says: 'glob_str_ptr is freed'
-[main.c] ocall_print: enclave says: 'testreach2'
 [main.c] ocall_print: enclave says: 'exiting enclave'
-[main.c] ocall_print_address: enclave says: 'glob str ptr' '0x7f072581a280'
+[main.c] ocall_print_address: enclave says: 'glob str ptr' '0x7f758841a1b0'
 [sched.c] continuing on CPU 1
 ==== System Settings ====
     Pstate max perf pct: 100
-    Pstate min perf pct: 78
-    Turbo Boost:         0
+    Pstate min perf pct: 19
+    Turbo Boost:         1
     cpu pinning:         1
     Designated cpu:      1
     Running on cpu:      1
-[enclave.c] tcs at 7f0725a00000; aep at 7f07267f04fc
+[enclave.c] tcs at 7f7588600000; aep at 7f75892f94fc
 ==== Victim Enclave ====
     Driver: /dev/sgx_enclave
-    Base:   0x7f0725800000
-    Limit:  0x7f0725a14000
+    Base:   0x7f7588400000
+    Limit:  0x7f7588614000
     Size:   2179072
     Exec:   18 pages
-    TCS:    0x7f0725a00000
-    SSA:    0x7f0725a00f48
-    AEP:    0x7f07267f04fc
+    TCS:    0x7f7588600000
+    SSA:    0x7f7588600f48
+    AEP:    0x7f75892f94fc
     EDBGRD: debug
-free() address: 0x7f07264add30, page start: 0x7f07264ad000
-test_dummy() address: 0x7f0725803000, page start: 0x7f0725803000
+free() address: 0x7f75890add30, page start: 0x7f75890ad000
+test_dummy() address: 0x7f7588403000, page start: 0x7f7588403000
 threadB running
 access rights revoked on free
-[main.c] ocall_print_address: enclave says: 'glob str ptr' '0x7f072581a280'
-[main.c] ocall_print_address: enclave says: 'mfp' '0x7f072581a270'
-[main.c] ocall_print_address: enclave says: 'succes func' '0x7f0725802063'
-[main.c] ocall_print_address: enclave says: 'str' '0x7f072582c010'
-[main.c] ocall_print: enclave says: 'test'
-[main.c] ocall_print_address: enclave says: 'glob str ptr' '0x7f072581a280'
-[main.c] ocall_print_address: enclave says: 'mfp->myputs' '0x7f0725802073'
-[main.c] ocall_print_address: enclave says: 'puts' '0x7f0725802073'
+[main.c] ocall_print_address: enclave says: 'str' '0x561cd9e1330d'
+[main.c] ocall_print_address: enclave says: 'glob str ptr' '0x7f758841a1b0'
+[main.c] ocall_print_address: enclave says: 'mfp' '0x7f758841a1a0'
+[main.c] ocall_print_address: enclave says: 'succes func' '0x7f7588402063'
+[main.c] ocall_print_address: enclave says: 'mfp->myputs' '0x7f7588402073'
+[main.c] ocall_print_address: enclave says: 'puts' '0x7f7588402073'
 [main.c] ocall_print: enclave says: 'japers'
-[main.c] ocall_print: enclave says: 'test2'
 [main.c] ocall_print: enclave says: 'glob_str_ptr is freed'
-[main.c] [Thread 139668662249152] Caught page fault with fault address: 0x7f0725803000, Adjusted page start: 0x7f0725803000
+[main.c] [Thread 140142765401792] Caught page fault with fault address: 0x7f7588403000, Adjusted page start: 0x7f7588403000
 
-jef
 access rights restored on test_dummy
 threadA running
-Original address: 0x7f0725802063
-Stored bytes in str: 63 20 80 25 07 7f 00 00 
-succes() address: 0x7f0725802063
-input string 0x7f07257fee98
+succes() address: 0x7f7588402063
 threadA entering enclave
-[main.c] ocall_print_address: enclave says: 'glob str ptr' '0x7f072581a280'
-[main.c] ocall_print_address: enclave says: 'mfp' '0x7f072581a280'
-[main.c] ocall_print_address: enclave says: 'succes func' '0x7f0725802063'
-[main.c] ocall_print_address: enclave says: 'str' '0x7f072582c030'
-[main.c] ocall_print: enclave says: 'test'
-[main.c] ocall_print_address: enclave says: 'glob str ptr' '0x7f072581a280'
-[main.c] ocall_print_address: enclave says: 'mfp->myputs' '0x7f0725802063'
-[main.c] ocall_print_address: enclave says: 'puts' '0x7f0725802073'
-[main.c] ocall_print: enclave says: 'exploit succesfull'
-[main.c] ocall_print: enclave says: 'test2'
+[main.c] ocall_print_address: enclave says: 'str' '0x7f75883feeb0'
+[main.c] ocall_print_address: enclave says: 'glob str ptr' '0x7f758841a1b0'
+[main.c] ocall_print_address: enclave says: 'mfp' '0x7f758841a1b0'
+[main.c] ocall_print_address: enclave says: 'succes func' '0x7f7588402063'
+[main.c] ocall_print_address: enclave says: 'mfp->myputs' '0x7f7588402063'
+[main.c] ocall_print_address: enclave says: 'puts' '0x7f7588402073'
+[main.c] ocall_print: enclave says: '☠️  SYSTEM HACKED ☠️'
 [main.c] ocall_print: enclave says: 'glob_str_ptr is freed'
-[main.c] ocall_print: enclave says: 'testreach2'
 [main.c] ocall_print: enclave says: 'exiting enclave'
 threadA finished
 --------------------------------------------------------------------------------
