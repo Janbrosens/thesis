@@ -126,7 +126,7 @@ void ecall_test(){
 
 // this ecall is called once before every execution
 void ecall_setup() {  
-    glob_str_ptr = my_malloc(sizeof(struct my_func_ptr));  
+    glob_str_ptr = malloc(sizeof(struct my_func_ptr));  
     ocall_print_address("glob str ptr",(uint64_t)glob_str_ptr);
 }
 
@@ -134,7 +134,7 @@ void ecall_setup() {
 void ecall_print_and_save_arg_once(uint64_t str) {  
     ocall_print_address("str", str);
 
-    struct my_func_ptr *mfp = my_malloc(sizeof(struct my_func_ptr));
+    struct my_func_ptr *mfp = malloc(sizeof(struct my_func_ptr));
     mfp->my_puts = puts;  
 
     ocall_print_address("glob str ptr", (uint64_t)glob_str_ptr);
@@ -150,7 +150,7 @@ void ecall_print_and_save_arg_once(uint64_t str) {
         ocall_print_address("puts",(uint64_t) (void*)puts); 
 
         mfp->my_puts(glob_str_ptr);  
-        my_free(glob_str_ptr, sizeof(struct my_func_ptr));
+        free(glob_str_ptr);
 
         ocall_print("glob_str_ptr is freed");
 
@@ -160,8 +160,9 @@ void ecall_print_and_save_arg_once(uint64_t str) {
         test_dummy();
         glob_str_ptr = NULL;  
     }  
-    
-    my_free(mfp, sizeof(struct my_func_ptr));  
+    ocall_print("kackx");
+
+    free(mfp);  
     ocall_print("exiting enclave");
 
 }
