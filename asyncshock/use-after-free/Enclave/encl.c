@@ -160,8 +160,7 @@ void ecall_print_and_save_arg_once(uint64_t str) {
         test_dummy();
         glob_str_ptr = NULL;  
     }  
-    ocall_print("kackx");
-
+    
     free(mfp);  
     ocall_print("exiting enclave");
 
