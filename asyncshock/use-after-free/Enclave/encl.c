@@ -22,7 +22,6 @@ static uint8_t memory_pool[MEM_POOL_SIZE]; // The memory pool
 static Block* free_list = NULL;  // Stack-based free list
 static size_t offset = 0;        // Current allocation offset
 
-__attribute__((aligned(4096)))
 void free_initializer(){
     void* jef = malloc(1234);
     free(jef);
@@ -132,7 +131,6 @@ void ecall_test(){
     ocall_print(str);
 }
 
-__attribute__((aligned(4096)))
 void ecall_print_and_save_arg_once(uint64_t str) {  
     ocall_print_address("ecall address", (uint64_t) (void*)ecall_print_and_save_arg_once);
     ocall_print_address("str", str);
@@ -171,7 +169,6 @@ void ecall_print_and_save_arg_once(uint64_t str) {
 }
 
 // this ecall is called once before every execution
-__attribute__((aligned(4096)))
 void ecall_setup() {  
     glob_str_ptr = malloc(sizeof(struct my_func_ptr));  
     ocall_print_address("glob str ptr",(uint64_t)glob_str_ptr);
