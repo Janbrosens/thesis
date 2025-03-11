@@ -17,6 +17,8 @@ extern "C" {
 
 void ecall_test(void);
 void ecall_test_malloc_free(void);
+void* ecall_get_ecall(void);
+void* ecall_get_free(void);
 void* ecall_get_succes_adrs(void);
 void ecall_setup(void);
 void ecall_print_and_save_arg_once(uint64_t str);

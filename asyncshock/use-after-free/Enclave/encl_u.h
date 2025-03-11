@@ -27,6 +27,8 @@ void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_print_address, (const char* str, uint64
 
 sgx_status_t ecall_test(sgx_enclave_id_t eid);
 sgx_status_t ecall_test_malloc_free(sgx_enclave_id_t eid);
+sgx_status_t ecall_get_ecall(sgx_enclave_id_t eid, void** retval);
+sgx_status_t ecall_get_free(sgx_enclave_id_t eid, void** retval);
 sgx_status_t ecall_get_succes_adrs(sgx_enclave_id_t eid, void** retval);
 sgx_status_t ecall_setup(sgx_enclave_id_t eid);
 sgx_status_t ecall_print_and_save_arg_once(sgx_enclave_id_t eid, uint64_t str);

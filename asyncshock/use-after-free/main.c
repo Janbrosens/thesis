@@ -28,6 +28,11 @@ int irq_cnt = 0, do_irq = 0, fault_cnt = 0, trigger_cnt = 0, step_cnt = 0;
 uint64_t *pte_encl = NULL, *pte_trigger = NULL, *pmd_encl = NULL;
 void *code_adrs, *trigger_adrs;
 
+// pointers to memcmp and strncmp 
+void* free_pt;
+void* ecall_pt;
+void* free_page_start;
+void* ecall_page_start;
 // test_dummy pointer
 //void *td_pt = NULL;
 
@@ -77,56 +82,52 @@ void fault_handler(int signo, siginfo_t * si, void  *ctx)
             abort();
     }
 
-
-    //code to get the address and page of the test_dummy() function, which permissions we will revoke like in the example in the paper
-    // Align address to page size  
-    // !!! test_dummy is page aligned and alone on his page in this setup (see asm.S) so this is a bit unneccessary 
-    //void *test_dummy_page_start = (void *)((size_t)td_pt & ~(4096 - 1));
-    //printf("test_dummy() address: %p, page start: %p\n", td_pt, test_dummy_page_start);
-
+    
+    fault_cnt++;
+    printf("faultcnt%d\n",fault_cnt);
     
     /*
-    //Revoke access rights on test_dummy after caught page fault on free 
+    if(fault_cnt == 20){
+       
+        //change thread to writer thread B
+        pthread_mutex_lock(&lock);
+        turn = 1; // set turn to thread A  
+        pthread_cond_signal(&cond); // Wake up thread_A
+        while(turn != 0){
+            pthread_cond_wait(&cond, &lock);
+        }
+        pthread_mutex_unlock(&lock); //end turn of thread B
+    }
+    */
+    //Revoke access rights on free after caught page fault on ecall 
+    if(fault_page == ecall_page_start){
+        if (mprotect(ecall_page_start, 4096, PROT_READ | PROT_EXEC) != 0) {
+            perror("mprotect failed");
+        }else{
+            printf("access rights restored on ecall\n");
+        }
+        
+    
+    }
+
+    //Revoke access rights on ecall after caught page fault on free 
     if(fault_page == free_page_start){
         if (mprotect(free_page_start, 4096, PROT_READ | PROT_EXEC) != 0) {
             perror("mprotect failed");
         }else{
             printf("access rights restored on free\n");
         }
-        //printf("tessdasdasdast\n");
-        // revoke execute permission on test_dummy()
-        if (mprotect(test_dummy_page_start, 4096, PROT_NONE) != 0) {
+        // revoke execute permission on memcpy()
+        if (mprotect(ecall_page_start, 4096, PROT_NONE) != 0) {
             perror("mprotect failed");
         }else{
-            printf("access rights revoked on test_dummy\n");
+            printf("access rights revoked on ecall\n");
         }
     
-    }*/
+    }
 
-    
-
-    //Restore access rights on test_dummy and change thread
-    
-    /*
-    if(fault_page == test_dummy_page_start){
-
-        // restore rights on test_dummy
-        if (mprotect(test_dummy_page_start, 4096, PROT_READ | PROT_EXEC) != 0) {
-            perror("mprotect failed");
-        }else{
-            printf("access rights restored on test_dummy\n");
-        }
-        
-
-        
-        //revoke rights on free
-        if (mprotect(free_page_start, 4096, PROT_NONE) != 0) {
-            perror("mprotect failed");
-        }else{
-            printf("access rights revoked on free\n");
-        }
-
-
+    if(fault_cnt == 2){
+            
         // CHANGE FROM THREAD B TO THREAD A
         pthread_mutex_lock(&lock);
         turn = 0; // set turn to thread A  
@@ -136,9 +137,18 @@ void fault_handler(int signo, siginfo_t * si, void  *ctx)
         }
         pthread_mutex_unlock(&lock); //end turn of thread B
         //pthread_exit(NULL);
-
         
-    }*/
+    }
+    if(fault_cnt == 3){
+            
+        pthread_exit(NULL);
+        
+    }
+
+
+   
+        
+    
 
 
 
@@ -272,11 +282,6 @@ void* thread_B(void* arg) {
     printf("threadB running\n");
 
    
-
-    //code to get the address and page of the free() function, which permissions we will revoke like in the example in the paper
-    void *free_addr = (void *)free;  // Get address of free()
-    // Align address to page size
-    void *free_page_start = (void *)((size_t)free_addr & ~(4096 - 1));
     if (mprotect(free_page_start, 4096, PROT_NONE) != 0) {
         perror("mprotect failed");
     }else{
@@ -321,22 +326,23 @@ int main( int argc, char **argv )
 
     // Do setup again
     ecall_setup(eid);
+
+
+    ecall_get_free(eid, &free_pt);
+
+    free_page_start = (void *)((size_t)free_pt & ~(4096 - 1));
+
+    ecall_get_ecall(eid, &ecall_pt);
+
+    ecall_page_start = (void *)((size_t)ecall_pt & ~(4096 - 1));
+
+    printf("free() address: %p, page start: %p\n", free_pt, free_page_start);
+    printf("ecall() address: %p, page start: %p\n", ecall_pt, ecall_page_start);
+
+
+
     /* 1. Setup attack execution environment. */
     attacker_config_runtime();
-
-    // get the address of test_dummy function, written to td_pt
-    //ecall_get_test_dummy_adrs(eid, &td_pt);
-
-
-    //code to get the address and page of the free() and test_dummy functions, which permissions we will revoke like in the example in the paper
-    void *free_addr = (void *)free;  // Get address of free()
-    // Align address to page size
-    void *free_page_start = (void *)((size_t)free_addr & ~(4096 - 1));
-    printf("free() address: %p, page start: %p\n", free_addr, free_page_start);
-
-    //void *test_dummy_page_start = (void *)((size_t)td_pt & ~(4096 - 1));
-    //printf("test_dummy() address: %p, page start: %p\n", td_pt, test_dummy_page_start);
-    
 
     // Create 2 threads
     pthread_t t1, t2;

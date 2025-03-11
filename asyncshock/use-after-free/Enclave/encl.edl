@@ -3,6 +3,8 @@ enclave {
         
         public void ecall_test();
         public void ecall_test_malloc_free();
+        public void *ecall_get_ecall();
+        public void *ecall_get_free();
         public void *ecall_get_succes_adrs();
         public void ecall_setup(); 
         public void ecall_print_and_save_arg_once(uint64_t str);

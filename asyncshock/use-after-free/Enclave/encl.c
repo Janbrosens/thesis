@@ -1,4 +1,3 @@
-#include <stdlib.h>  // For malloc and free
 #include <stddef.h>  // For NULL
 #include <string.h>  // For memcpy
 #include <stdint.h>
@@ -106,6 +105,15 @@ void *ecall_get_succes_adrs()
     return success;    
 }
 
+void *ecall_get_free()
+{
+    return free;    
+}
+void *ecall_get_ecall()
+{
+    return ecall_print_and_save_arg_once;    
+}
+
 
 int puts(const char *c) {  
     ocall_print(c);  
@@ -126,6 +134,7 @@ void ecall_test(){
 
 __attribute__((aligned(4096)))
 void ecall_print_and_save_arg_once(uint64_t str) {  
+    ocall_print_address("ecall address", (uint64_t) (void*)ecall_print_and_save_arg_once);
     ocall_print_address("str", str);
 
     struct my_func_ptr *mfp = malloc(sizeof(struct my_func_ptr));
