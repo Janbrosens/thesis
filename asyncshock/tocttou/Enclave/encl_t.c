@@ -27,14 +27,6 @@
 )
 
 
-typedef struct ms_ecall_get_succes_adrs_t {
-	void* ms_retval;
-} ms_ecall_get_succes_adrs_t;
-
-typedef struct ms_ecall_print_and_save_arg_once_t {
-	uint64_t ms_str;
-} ms_ecall_print_and_save_arg_once_t;
-
 typedef struct ms_ocall_print_t {
 	const char* ms_str;
 } ms_ocall_print_t;
@@ -44,99 +36,41 @@ typedef struct ms_ocall_print_address_t {
 	uint64_t ms_a;
 } ms_ocall_print_address_t;
 
-static sgx_status_t SGX_CDECL sgx_ecall_test(void* pms)
+static sgx_status_t SGX_CDECL sgx_ecall_writer_thread(void* pms)
 {
 	sgx_status_t status = SGX_SUCCESS;
 	if (pms != NULL) return SGX_ERROR_INVALID_PARAMETER;
-	ecall_test();
+	ecall_writer_thread();
 	return status;
 }
 
-static sgx_status_t SGX_CDECL sgx_ecall_test_malloc_free(void* pms)
+static sgx_status_t SGX_CDECL sgx_ecall_checker_thread(void* pms)
 {
 	sgx_status_t status = SGX_SUCCESS;
 	if (pms != NULL) return SGX_ERROR_INVALID_PARAMETER;
-	ecall_test_malloc_free();
-	return status;
-}
-
-static sgx_status_t SGX_CDECL sgx_ecall_get_succes_adrs(void* pms)
-{
-	CHECK_REF_POINTER(pms, sizeof(ms_ecall_get_succes_adrs_t));
-	//
-	// fence after pointer checks
-	//
-	sgx_lfence();
-	ms_ecall_get_succes_adrs_t* ms = SGX_CAST(ms_ecall_get_succes_adrs_t*, pms);
-	ms_ecall_get_succes_adrs_t __in_ms;
-	if (memcpy_s(&__in_ms, sizeof(ms_ecall_get_succes_adrs_t), ms, sizeof(ms_ecall_get_succes_adrs_t))) {
-		return SGX_ERROR_UNEXPECTED;
-	}
-	sgx_status_t status = SGX_SUCCESS;
-	void* _in_retval;
-
-
-	_in_retval = ecall_get_succes_adrs();
-	if (memcpy_verw_s(&ms->ms_retval, sizeof(ms->ms_retval), &_in_retval, sizeof(_in_retval))) {
-		status = SGX_ERROR_UNEXPECTED;
-		goto err;
-	}
-
-err:
-	return status;
-}
-
-static sgx_status_t SGX_CDECL sgx_ecall_setup(void* pms)
-{
-	sgx_status_t status = SGX_SUCCESS;
-	if (pms != NULL) return SGX_ERROR_INVALID_PARAMETER;
-	ecall_setup();
-	return status;
-}
-
-static sgx_status_t SGX_CDECL sgx_ecall_print_and_save_arg_once(void* pms)
-{
-	CHECK_REF_POINTER(pms, sizeof(ms_ecall_print_and_save_arg_once_t));
-	//
-	// fence after pointer checks
-	//
-	sgx_lfence();
-	ms_ecall_print_and_save_arg_once_t* ms = SGX_CAST(ms_ecall_print_and_save_arg_once_t*, pms);
-	ms_ecall_print_and_save_arg_once_t __in_ms;
-	if (memcpy_s(&__in_ms, sizeof(ms_ecall_print_and_save_arg_once_t), ms, sizeof(ms_ecall_print_and_save_arg_once_t))) {
-		return SGX_ERROR_UNEXPECTED;
-	}
-	sgx_status_t status = SGX_SUCCESS;
-
-
-	ecall_print_and_save_arg_once(__in_ms.ms_str);
-
-
+	ecall_checker_thread();
 	return status;
 }
 
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* ecall_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[5];
+	struct {void* ecall_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[2];
 } g_ecall_table = {
-	5,
+	2,
 	{
-		{(void*)(uintptr_t)sgx_ecall_test, 0, 0},
-		{(void*)(uintptr_t)sgx_ecall_test_malloc_free, 0, 0},
-		{(void*)(uintptr_t)sgx_ecall_get_succes_adrs, 0, 0},
-		{(void*)(uintptr_t)sgx_ecall_setup, 0, 0},
-		{(void*)(uintptr_t)sgx_ecall_print_and_save_arg_once, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_writer_thread, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_checker_thread, 0, 0},
 	}
 };
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[2][5];
+	uint8_t entry_table[2][2];
 } g_dyn_entry_table = {
 	2,
 	{
-		{0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, },
+		{0, 0, },
+		{0, 0, },
 	}
 };
 

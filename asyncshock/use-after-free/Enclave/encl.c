@@ -1,5 +1,5 @@
-#include <stddef.h>  // For NULL
 #include <stdlib.h>  // For malloc and free
+#include <stddef.h>  // For NULL
 #include <string.h>  // For memcpy
 #include <stdint.h>
 #include <stdbool.h>
@@ -22,6 +22,12 @@ typedef struct Block {
 static uint8_t memory_pool[MEM_POOL_SIZE]; // The memory pool
 static Block* free_list = NULL;  // Stack-based free list
 static size_t offset = 0;        // Current allocation offset
+
+__attribute__((aligned(4096)))
+void free_initializer(){
+    void* jef = malloc(1234);
+    free(jef);
+}
 
 // Align size to the next multiple of ALIGNMENT
 static size_t align_size(size_t size) {
@@ -94,13 +100,6 @@ int other_functions(const char *c) {
     /* do other things */
 }
 
-// test_dummy is defined in asm.S, because for this setup we want to make it page aligned and alone on a page
-uint64_t test_dummy();
-
-void *ecall_get_test_dummy_adrs()
-{
-    return test_dummy;    
-}
 
 void *ecall_get_succes_adrs()
 {
@@ -119,18 +118,13 @@ struct my_func_ptr {
 } my_func_ptr;  
 
 
+
 void ecall_test(){
     const char* str= "jeffrey";
     ocall_print(str);
 }
 
-// this ecall is called once before every execution
-void ecall_setup() {  
-    glob_str_ptr = malloc(sizeof(struct my_func_ptr));  
-    ocall_print_address("glob str ptr",(uint64_t)glob_str_ptr);
-}
-
-
+__attribute__((aligned(4096)))
 void ecall_print_and_save_arg_once(uint64_t str) {  
     ocall_print_address("str", str);
 
@@ -157,11 +151,20 @@ void ecall_print_and_save_arg_once(uint64_t str) {
         // for this setup, extra helper function where page access can be revoked from easily,
         // normal attack will require a more complex state machine to revoke page accesses
         // --- PAGE FAULT HERE (after free) ---
-        test_dummy();
+        //test_dummy();
         glob_str_ptr = NULL;  
     }  
-    
+    ocall_print("blabla bla");
+
     free(mfp);  
     ocall_print("exiting enclave");
 
 }
+
+// this ecall is called once before every execution
+__attribute__((aligned(4096)))
+void ecall_setup() {  
+    glob_str_ptr = malloc(sizeof(struct my_func_ptr));  
+    ocall_print_address("glob str ptr",(uint64_t)glob_str_ptr);
+}
+

