@@ -27,6 +27,8 @@ void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_print_address, (const char* str, uint64
 
 sgx_status_t ecall_writer_thread(sgx_enclave_id_t eid);
 sgx_status_t ecall_checker_thread(sgx_enclave_id_t eid);
+sgx_status_t ecall_get_memcpy(sgx_enclave_id_t eid, void** retval);
+sgx_status_t ecall_get_strncmp(sgx_enclave_id_t eid, void** retval);
 
 #ifdef __cplusplus
 }

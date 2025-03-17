@@ -27,6 +27,14 @@
 )
 
 
+typedef struct ms_ecall_get_memcpy_t {
+	void* ms_retval;
+} ms_ecall_get_memcpy_t;
+
+typedef struct ms_ecall_get_strncmp_t {
+	void* ms_retval;
+} ms_ecall_get_strncmp_t;
+
 typedef struct ms_ocall_print_t {
 	const char* ms_str;
 } ms_ocall_print_t;
@@ -52,25 +60,79 @@ static sgx_status_t SGX_CDECL sgx_ecall_checker_thread(void* pms)
 	return status;
 }
 
+static sgx_status_t SGX_CDECL sgx_ecall_get_memcpy(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_get_memcpy_t));
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+	ms_ecall_get_memcpy_t* ms = SGX_CAST(ms_ecall_get_memcpy_t*, pms);
+	ms_ecall_get_memcpy_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_ecall_get_memcpy_t), ms, sizeof(ms_ecall_get_memcpy_t))) {
+		return SGX_ERROR_UNEXPECTED;
+	}
+	sgx_status_t status = SGX_SUCCESS;
+	void* _in_retval;
+
+
+	_in_retval = ecall_get_memcpy();
+	if (memcpy_verw_s(&ms->ms_retval, sizeof(ms->ms_retval), &_in_retval, sizeof(_in_retval))) {
+		status = SGX_ERROR_UNEXPECTED;
+		goto err;
+	}
+
+err:
+	return status;
+}
+
+static sgx_status_t SGX_CDECL sgx_ecall_get_strncmp(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_get_strncmp_t));
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+	ms_ecall_get_strncmp_t* ms = SGX_CAST(ms_ecall_get_strncmp_t*, pms);
+	ms_ecall_get_strncmp_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_ecall_get_strncmp_t), ms, sizeof(ms_ecall_get_strncmp_t))) {
+		return SGX_ERROR_UNEXPECTED;
+	}
+	sgx_status_t status = SGX_SUCCESS;
+	void* _in_retval;
+
+
+	_in_retval = ecall_get_strncmp();
+	if (memcpy_verw_s(&ms->ms_retval, sizeof(ms->ms_retval), &_in_retval, sizeof(_in_retval))) {
+		status = SGX_ERROR_UNEXPECTED;
+		goto err;
+	}
+
+err:
+	return status;
+}
+
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* ecall_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[2];
+	struct {void* ecall_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[4];
 } g_ecall_table = {
-	2,
+	4,
 	{
 		{(void*)(uintptr_t)sgx_ecall_writer_thread, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_checker_thread, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_get_memcpy, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_get_strncmp, 0, 0},
 	}
 };
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[2][2];
+	uint8_t entry_table[2][4];
 } g_dyn_entry_table = {
 	2,
 	{
-		{0, 0, },
-		{0, 0, },
+		{0, 0, 0, 0, },
+		{0, 0, 0, 0, },
 	}
 };
 

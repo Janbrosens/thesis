@@ -21,7 +21,6 @@
 #include "Enclave/encl_u.h"
 #include <pthread.h>
 
-#define DO_TIMER_STEP      0
 
 //These are global variables (see memcmp)
 int irq_cnt = 0, do_irq = 0, fault_cnt = 0, trigger_cnt = 0, step_cnt = 0;
@@ -70,7 +69,9 @@ void ocall_print_address(const char *str, uint64_t a)
 void fault_handler(int signo, siginfo_t * si, void  *ctx)
 {
    
-     void *fault_page = (void *)((uintptr_t)si->si_addr & ~(4096 - 1));
+    
+
+    void *fault_page = (void *)((uintptr_t)si->si_addr & ~(4096 - 1));
 
     switch (signo) {
         case SIGSEGV:
@@ -324,20 +325,33 @@ int main( int argc, char **argv )
     char* str = "dryrun";
     ecall_print_and_save_arg_once(eid, (uint64_t) str);
 
+
+
+
     // Do setup again
     ecall_setup(eid);
 
 
-    ecall_get_free(eid, &free_pt);
+   
 
+    void* encl_base_addr = get_enclave_base();
+    info("encl base address: '%p'", encl_base_addr);
+
+    // static anal gives us these
+    void* offset_free = 0xef40; // always the same, base of encl different but no ASLR in encl itself
+    void* offset_ecall = 0x2081;
+   
+    // get addresses of functions inside the enclave
+    free_pt = encl_base_addr + (uint64_t) offset_free; // not just same as free of untrusted
+    ecall_pt = encl_base_addr + (uint64_t) offset_ecall;
+
+    // get page start
     free_page_start = (void *)((size_t)free_pt & ~(4096 - 1));
-
-    ecall_get_ecall(eid, &ecall_pt);
-
     ecall_page_start = (void *)((size_t)ecall_pt & ~(4096 - 1));
 
     printf("free() address: %p, page start: %p\n", free_pt, free_page_start);
     printf("ecall() address: %p, page start: %p\n", ecall_pt, ecall_page_start);
+
 
 
 

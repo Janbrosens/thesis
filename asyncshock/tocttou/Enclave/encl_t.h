@@ -17,6 +17,8 @@ extern "C" {
 
 void ecall_writer_thread(void);
 void ecall_checker_thread(void);
+void* ecall_get_memcpy(void);
+void* ecall_get_strncmp(void);
 
 sgx_status_t SGX_CDECL ocall_print(const char* str);
 sgx_status_t SGX_CDECL ocall_print_address(const char* str, uint64_t a);

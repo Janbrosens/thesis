@@ -1,6 +1,14 @@
 #include "encl_u.h"
 #include <errno.h>
 
+typedef struct ms_ecall_get_memcpy_t {
+	void* ms_retval;
+} ms_ecall_get_memcpy_t;
+
+typedef struct ms_ecall_get_strncmp_t {
+	void* ms_retval;
+} ms_ecall_get_strncmp_t;
+
 typedef struct ms_ocall_print_t {
 	const char* ms_str;
 } ms_ocall_print_t;
@@ -47,6 +55,24 @@ sgx_status_t ecall_checker_thread(sgx_enclave_id_t eid)
 {
 	sgx_status_t status;
 	status = sgx_ecall(eid, 1, &ocall_table_encl, NULL);
+	return status;
+}
+
+sgx_status_t ecall_get_memcpy(sgx_enclave_id_t eid, void** retval)
+{
+	sgx_status_t status;
+	ms_ecall_get_memcpy_t ms;
+	status = sgx_ecall(eid, 2, &ocall_table_encl, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
+sgx_status_t ecall_get_strncmp(sgx_enclave_id_t eid, void** retval)
+{
+	sgx_status_t status;
+	ms_ecall_get_strncmp_t ms;
+	status = sgx_ecall(eid, 3, &ocall_table_encl, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
 

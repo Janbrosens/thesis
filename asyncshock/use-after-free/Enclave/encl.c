@@ -113,7 +113,6 @@ void *ecall_get_ecall()
     return ecall_print_and_save_arg_once;    
 }
 
-
 int puts(const char *c) {  
     ocall_print(c);  
     return 0;  
