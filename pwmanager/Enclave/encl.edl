@@ -1,0 +1,23 @@
+enclave {
+	trusted {
+        
+        public void ecall_writer_thread();
+        public void ecall_checker_thread();
+        public void *ecall_get_memcpy();
+        public void *ecall_get_strncmp();
+
+
+        
+        
+       
+
+    };
+	
+	untrusted {
+        void ocall_print([in,string] const char *str);
+        //void ocall_print2([in,string] const char *desc, [in,string] const char *str);
+        void ocall_print_address([in,string] const char *str, uint64_t a);
+        
+
+	};
+};
