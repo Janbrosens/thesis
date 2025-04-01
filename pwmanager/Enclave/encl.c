@@ -1,48 +1,52 @@
-#include <stdint.h>
 #include <string.h>
-#include <stdlib.h>
+#include <sgx_trts.h>    // For SGX security checks
 #include <stdio.h>
+#include <unistd.h>      // Simulate delay
 
 
-static char data[] = {'g', 'o', 'o', 'd', ' ', 'd', 'a', 't', 'a', '\0'};  
-
-int ecall_checker_thread() {
-    //ocall_print("test1");  
-    char *str = calloc(1, 10);
-    //ocall_print("test2");  
-    if (strncmp(" bad data ", data, 9) != 0) { 
-        ocall_print("test3"); 
-        memcpy(str, data, 10);  
-        ocall_print("ACCESS OK");
-        ocall_print(str); 
-        //PROBLEEM MET FREE
-        free(str);  
-        return 0;  
-    } else {  
-        ocall_print(" Sorry, no access!\n");  
-        return -1;  
-    }  
-}  
+int currentDeviceId = NULL;
+char* password = "secret_pw";
+int is_authenticated = 0; 
 
 
-void ecall_writer_thread() {    
+void ecall_login(int deviceId, const char* pw){
+
+    // no 2 devices at the same time 
+    if(currentDeviceId == NULL){
+        currentDeviceId = deviceId;
+
+        if (strcmp(pw, password) == 0) {
+            ocall_print("Password check passed, you are logged in!");
+            is_authenticated = 1; 
+        }else{
+            currentDeviceId = NULL;
+            ocall_print("Password check failed!");
+        }
+
+       
+    }else{
+        ocall_print("Other device already logged in");
+    }
+   
+}
+
+void ecall_logout(){
     
-    ocall_print_address("strncmp", (uint64_t) (void*) strncmp);
-    ocall_print_address("memcpy", (uint64_t) (void*) memcpy);
-    ocall_print_address("ecall_checker", (uint64_t) (void*) ecall_checker_thread);
-
-    snprintf(data, 10, " bad data ");  
-}  
-
-void *ecall_get_memcpy()
-{
-    return memcpy;    
-}
-
-void *ecall_get_strncmp()
-{
-    return strncmp;    
+    if(currentDeviceId != NULL){
+        currentDeviceId = NULL;
+        is_authenticated = 0;
+        ocall_print("You are logged out!");
+    }
 }
 
 
+void ecall_get_password(int deviceId) {
 
+    if(deviceId == currentDeviceId){
+        if (is_authenticated) { 
+            ocall_print(password);
+        }
+    } else {
+        ocall_print("Access denied.");
+    }
+}

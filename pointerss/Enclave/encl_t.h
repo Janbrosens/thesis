@@ -15,9 +15,8 @@
 extern "C" {
 #endif
 
-void ecall_login(int deviceId, const char* pw);
-void ecall_logout(int deviceId);
-void ecall_get_password(int deviceId);
+void ecall_increase(void);
+int ecall_lookup(void);
 
 sgx_status_t SGX_CDECL ocall_print(const char* str);
 sgx_status_t SGX_CDECL ocall_print_address(const char* str, uint64_t a);

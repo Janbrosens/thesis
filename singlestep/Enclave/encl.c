@@ -16,13 +16,12 @@ void ecall_increase(){
 }
 
 int ecall_lookup(){
-    
-    /*
-    if(idx < 10){
-        return array[idx];
-    }
-    return 9999;
-    */
-   return array[idx];
+    ocall_print("test1");
+
+    ocall_print("test2");
+
+    ocall_print("test3");
+
+    return array[idx];
 }
 

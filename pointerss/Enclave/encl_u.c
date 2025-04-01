@@ -1,19 +1,9 @@
 #include "encl_u.h"
 #include <errno.h>
 
-typedef struct ms_ecall_login_t {
-	int ms_deviceId;
-	const char* ms_pw;
-	size_t ms_pw_len;
-} ms_ecall_login_t;
-
-typedef struct ms_ecall_logout_t {
-	int ms_deviceId;
-} ms_ecall_logout_t;
-
-typedef struct ms_ecall_get_password_t {
-	int ms_deviceId;
-} ms_ecall_get_password_t;
+typedef struct ms_ecall_lookup_t {
+	int ms_retval;
+} ms_ecall_lookup_t;
 
 typedef struct ms_ocall_print_t {
 	const char* ms_str;
@@ -50,32 +40,19 @@ static const struct {
 		(void*)encl_ocall_print_address,
 	}
 };
-sgx_status_t ecall_login(sgx_enclave_id_t eid, int deviceId, const char* pw)
+sgx_status_t ecall_increase(sgx_enclave_id_t eid)
 {
 	sgx_status_t status;
-	ms_ecall_login_t ms;
-	ms.ms_deviceId = deviceId;
-	ms.ms_pw = pw;
-	ms.ms_pw_len = pw ? strlen(pw) + 1 : 0;
-	status = sgx_ecall(eid, 0, &ocall_table_encl, &ms);
+	status = sgx_ecall(eid, 0, &ocall_table_encl, NULL);
 	return status;
 }
 
-sgx_status_t ecall_logout(sgx_enclave_id_t eid, int deviceId)
+sgx_status_t ecall_lookup(sgx_enclave_id_t eid, int* retval)
 {
 	sgx_status_t status;
-	ms_ecall_logout_t ms;
-	ms.ms_deviceId = deviceId;
+	ms_ecall_lookup_t ms;
 	status = sgx_ecall(eid, 1, &ocall_table_encl, &ms);
-	return status;
-}
-
-sgx_status_t ecall_get_password(sgx_enclave_id_t eid, int deviceId)
-{
-	sgx_status_t status;
-	ms_ecall_get_password_t ms;
-	ms.ms_deviceId = deviceId;
-	status = sgx_ecall(eid, 2, &ocall_table_encl, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
 

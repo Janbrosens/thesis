@@ -25,9 +25,8 @@ void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_print, (const char* str));
 void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_print_address, (const char* str, uint64_t a));
 #endif
 
-sgx_status_t ecall_login(sgx_enclave_id_t eid, int deviceId, const char* pw);
-sgx_status_t ecall_logout(sgx_enclave_id_t eid, int deviceId);
-sgx_status_t ecall_get_password(sgx_enclave_id_t eid, int deviceId);
+sgx_status_t ecall_increase(sgx_enclave_id_t eid);
+sgx_status_t ecall_lookup(sgx_enclave_id_t eid, int* retval);
 
 #ifdef __cplusplus
 }

