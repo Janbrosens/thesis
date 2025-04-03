@@ -324,6 +324,7 @@ void* thread_A(void* arg) {
 
 void* thread_B(void* arg) {
 
+    
     sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
     
     // locking for turn, sync logic, thread B sleeps until thread A does amount of page fault

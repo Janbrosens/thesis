@@ -26,6 +26,11 @@ int irq_cnt = 0, do_irq = 0, fault_cnt = 0, trigger_cnt = 0, step_cnt = 0;
 uint64_t *pte_encl = NULL, *pte_trigger = NULL, *pmd_encl = NULL;
 void *code_adrs, *trigger_adrs;
 
+// THREADING INIT
+int turn = 0; // 0 for thread_A, 1 for thread_B
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+
 sgx_enclave_id_t create_enclave(void)
 {
     sgx_launch_token_t token = {0};
@@ -53,8 +58,24 @@ void ocall_print_address(const char *str, uint64_t a)
 /* Called before resuming the enclave after an Asynchronous Enclave eXit. */
 void aep_cb_func(void)
 {
+    info("aep");
+    uint64_t erip = edbgrd_erip() - (uint64_t) get_enclave_base();
+    info("^^ enclave RIP=%#llx", erip);
 
-   info("aep");
+    if(erip == 0x2073){
+        info("testreach");
+        sgx_step_do_trap = 0;
+
+        //change thread to writer thread B
+        pthread_mutex_lock(&lock);
+        turn = 1; // set turn to thread B
+        pthread_cond_signal(&cond); // Wake up thread_B
+        while(turn != 0){
+            pthread_cond_wait(&cond, &lock);
+        }
+        pthread_mutex_unlock(&lock); //end turn of thread A
+
+    }
 
 
 
@@ -81,7 +102,7 @@ void fault_handler(int signo, siginfo_t * si, void  *ctx)
             info("Restoring trigger access rights..");
             
             ASSERT(!mprotect(trigger_adrs, 4096, PROT_READ | PROT_EXEC));
-           // do_irq = 1;
+            do_irq = 1;
 
             #if !DO_TIMER_STEP
                 sgx_step_do_trap = 1;
@@ -160,6 +181,80 @@ void attacker_config_page_table(void)
     
 }
 
+// Function for thread A
+void* thread_A(void* arg) {
+
+
+
+    // locking for turn, sync logic, thread A sleeps until thread B does a page fault
+    pthread_mutex_lock(&lock);
+    while (turn != 0) { // Wait until it's thread_A's turn
+        pthread_cond_wait(&cond, &lock);
+    }
+    pthread_mutex_unlock(&lock);
+
+    printf("lookup thread running\n");
+
+    sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
+    int rv = 1;
+    ecall_lookup(eidarg, &rv);
+    printf("%d\n",rv);
+    printf("lookup thread finished\n");
+
+
+    
+}
+
+// Function for thread B
+
+void* thread_B(void* arg) {
+
+
+   
+    
+    
+    // locking for turn, sync logic, thread B sleeps until thread A does amount of page fault
+    pthread_mutex_lock(&lock);
+    while (turn != 1) { // Wait until it's thread_B's turn
+        pthread_cond_wait(&cond, &lock);
+    }
+    pthread_mutex_unlock(&lock);
+
+    printf("increase thread running\n");
+
+    
+    sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
+
+
+    ecall_increase(eidarg);
+    ecall_increase(eidarg);
+    ecall_increase(eidarg);
+    ecall_increase(eidarg);
+    ecall_increase(eidarg);
+    ecall_increase(eidarg);
+    ecall_increase(eidarg);
+    ecall_increase(eidarg);
+    ecall_increase(eidarg);
+    ecall_increase(eidarg);
+ 
+    
+   
+
+
+    
+    
+    // CHANGE FROM THREAD B TO THREAD A
+    pthread_mutex_lock(&lock);
+    turn = 0; // set turn to thread A  
+    pthread_cond_signal(&cond); // Wake up thread_A
+    while(turn != 1){
+        pthread_cond_wait(&cond, &lock);
+    }
+    pthread_mutex_unlock(&lock); //end turn of thread B
+    
+    
+
+}
 
 int main( int argc, char **argv )
 {
@@ -187,10 +282,16 @@ int main( int argc, char **argv )
     do_irq = 0; trigger_cnt = 0, irq_cnt = 0, step_cnt = 0, fault_cnt = 0;
     sgx_step_do_trap = 0;
 
-    ecall_lookup(eid, &rv);
+    // Create 2 threads
+    pthread_t t1, t2;
+    pthread_create(&t1, NULL, thread_A, (void*)&eid);
+    pthread_create(&t2, NULL, thread_B, (void*)&eid);
+
+    pthread_join(t1, NULL);
+    //pthread_join(t2, NULL);
 
 
-    printf("%d\n", rv);
+
     
 
 }
