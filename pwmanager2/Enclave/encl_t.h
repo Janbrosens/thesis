@@ -15,18 +15,8 @@
 extern "C" {
 #endif
 
-#ifndef _my_struct
-#define _my_struct
-typedef struct my_struct {
-	int* sump;
-	int* prodp;
-} my_struct;
-#endif
-
-void ecall_update_response_loc(struct my_struct* input_pointer);
-void ecall_compute_response(int i, int j);
-void ecall_get_response(void);
-void ecall_check_secret(int s);
+void ecall_setup(void);
+void ecall_get_passwords(char* masterpw);
 
 sgx_status_t SGX_CDECL ocall_print(const char* str);
 sgx_status_t SGX_CDECL ocall_print_address(const char* str, uint64_t a);

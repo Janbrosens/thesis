@@ -1,10 +1,19 @@
 enclave {
+    struct my_struct {
+        int* sump;
+        int* prodp;
+    };
+
 	trusted {
-        
-        public void ecall_increase();
-        public int ecall_lookup();
+
+        public void ecall_update_response_loc([user_check] struct my_struct* input_pointer);
+        public void ecall_compute_response(int i, int j);
+        public void ecall_get_response();
+        public void ecall_check_secret(int s);
 
     };
+
+   
 	
 	untrusted {
         void ocall_print([in,string] const char *str);

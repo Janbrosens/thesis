@@ -27,18 +27,10 @@
 )
 
 
-typedef struct ms_ecall_update_response_loc_t {
-	struct my_struct* ms_input_pointer;
-} ms_ecall_update_response_loc_t;
-
-typedef struct ms_ecall_compute_response_t {
-	int ms_i;
-	int ms_j;
-} ms_ecall_compute_response_t;
-
-typedef struct ms_ecall_check_secret_t {
-	int ms_s;
-} ms_ecall_check_secret_t;
+typedef struct ms_ecall_get_passwords_t {
+	char* ms_masterpw;
+	size_t ms_masterpw_len;
+} ms_ecall_get_passwords_t;
 
 typedef struct ms_ocall_print_t {
 	const char* ms_str;
@@ -49,99 +41,83 @@ typedef struct ms_ocall_print_address_t {
 	uint64_t ms_a;
 } ms_ocall_print_address_t;
 
-static sgx_status_t SGX_CDECL sgx_ecall_update_response_loc(void* pms)
-{
-	CHECK_REF_POINTER(pms, sizeof(ms_ecall_update_response_loc_t));
-	//
-	// fence after pointer checks
-	//
-	sgx_lfence();
-	ms_ecall_update_response_loc_t* ms = SGX_CAST(ms_ecall_update_response_loc_t*, pms);
-	ms_ecall_update_response_loc_t __in_ms;
-	if (memcpy_s(&__in_ms, sizeof(ms_ecall_update_response_loc_t), ms, sizeof(ms_ecall_update_response_loc_t))) {
-		return SGX_ERROR_UNEXPECTED;
-	}
-	sgx_status_t status = SGX_SUCCESS;
-	struct my_struct* _tmp_input_pointer = __in_ms.ms_input_pointer;
-
-
-	ecall_update_response_loc(_tmp_input_pointer);
-
-
-	return status;
-}
-
-static sgx_status_t SGX_CDECL sgx_ecall_compute_response(void* pms)
-{
-	CHECK_REF_POINTER(pms, sizeof(ms_ecall_compute_response_t));
-	//
-	// fence after pointer checks
-	//
-	sgx_lfence();
-	ms_ecall_compute_response_t* ms = SGX_CAST(ms_ecall_compute_response_t*, pms);
-	ms_ecall_compute_response_t __in_ms;
-	if (memcpy_s(&__in_ms, sizeof(ms_ecall_compute_response_t), ms, sizeof(ms_ecall_compute_response_t))) {
-		return SGX_ERROR_UNEXPECTED;
-	}
-	sgx_status_t status = SGX_SUCCESS;
-
-
-	ecall_compute_response(__in_ms.ms_i, __in_ms.ms_j);
-
-
-	return status;
-}
-
-static sgx_status_t SGX_CDECL sgx_ecall_get_response(void* pms)
+static sgx_status_t SGX_CDECL sgx_ecall_setup(void* pms)
 {
 	sgx_status_t status = SGX_SUCCESS;
 	if (pms != NULL) return SGX_ERROR_INVALID_PARAMETER;
-	ecall_get_response();
+	ecall_setup();
 	return status;
 }
 
-static sgx_status_t SGX_CDECL sgx_ecall_check_secret(void* pms)
+static sgx_status_t SGX_CDECL sgx_ecall_get_passwords(void* pms)
 {
-	CHECK_REF_POINTER(pms, sizeof(ms_ecall_check_secret_t));
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_get_passwords_t));
 	//
 	// fence after pointer checks
 	//
 	sgx_lfence();
-	ms_ecall_check_secret_t* ms = SGX_CAST(ms_ecall_check_secret_t*, pms);
-	ms_ecall_check_secret_t __in_ms;
-	if (memcpy_s(&__in_ms, sizeof(ms_ecall_check_secret_t), ms, sizeof(ms_ecall_check_secret_t))) {
+	ms_ecall_get_passwords_t* ms = SGX_CAST(ms_ecall_get_passwords_t*, pms);
+	ms_ecall_get_passwords_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_ecall_get_passwords_t), ms, sizeof(ms_ecall_get_passwords_t))) {
 		return SGX_ERROR_UNEXPECTED;
 	}
 	sgx_status_t status = SGX_SUCCESS;
+	char* _tmp_masterpw = __in_ms.ms_masterpw;
+	size_t _len_masterpw = __in_ms.ms_masterpw_len ;
+	char* _in_masterpw = NULL;
 
+	CHECK_UNIQUE_POINTER(_tmp_masterpw, _len_masterpw);
 
-	ecall_check_secret(__in_ms.ms_s);
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
 
+	if (_tmp_masterpw != NULL && _len_masterpw != 0) {
+		_in_masterpw = (char*)malloc(_len_masterpw);
+		if (_in_masterpw == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
 
+		if (memcpy_s(_in_masterpw, _len_masterpw, _tmp_masterpw, _len_masterpw)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+
+		_in_masterpw[_len_masterpw - 1] = '\0';
+		if (_len_masterpw != strlen(_in_masterpw) + 1)
+		{
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+	}
+	ecall_get_passwords(_in_masterpw);
+
+err:
+	if (_in_masterpw) free(_in_masterpw);
 	return status;
 }
 
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* ecall_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[4];
+	struct {void* ecall_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[2];
 } g_ecall_table = {
-	4,
+	2,
 	{
-		{(void*)(uintptr_t)sgx_ecall_update_response_loc, 0, 0},
-		{(void*)(uintptr_t)sgx_ecall_compute_response, 0, 0},
-		{(void*)(uintptr_t)sgx_ecall_get_response, 0, 0},
-		{(void*)(uintptr_t)sgx_ecall_check_secret, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_setup, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_get_passwords, 0, 0},
 	}
 };
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[2][4];
+	uint8_t entry_table[2][2];
 } g_dyn_entry_table = {
 	2,
 	{
-		{0, 0, 0, 0, },
-		{0, 0, 0, 0, },
+		{0, 0, },
+		{0, 0, },
 	}
 };
 

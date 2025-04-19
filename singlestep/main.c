@@ -59,10 +59,14 @@ void ocall_print_address(const char *str, uint64_t a)
 void aep_cb_func(void)
 {
     info("aep");
+    step_cnt++;
+    printf("stepcnt %d\n", step_cnt);
+    
     uint64_t erip = edbgrd_erip() - (uint64_t) get_enclave_base();
     info("^^ enclave RIP=%#llx", erip);
-
-    if(erip == 0x2073){
+    
+    // 0x2075
+    if(step_cnt == 7){
         info("testreach");
         sgx_step_do_trap = 0;
 
@@ -236,10 +240,6 @@ void* thread_B(void* arg) {
     ecall_increase(eidarg);
     ecall_increase(eidarg);
     ecall_increase(eidarg);
- 
-    
-   
-
 
     
     

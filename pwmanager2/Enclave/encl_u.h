@@ -16,14 +16,6 @@
 extern "C" {
 #endif
 
-#ifndef _my_struct
-#define _my_struct
-typedef struct my_struct {
-	int* sump;
-	int* prodp;
-} my_struct;
-#endif
-
 #ifndef OCALL_PRINT_DEFINED__
 #define OCALL_PRINT_DEFINED__
 void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_print, (const char* str));
@@ -33,10 +25,8 @@ void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_print, (const char* str));
 void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_print_address, (const char* str, uint64_t a));
 #endif
 
-sgx_status_t ecall_update_response_loc(sgx_enclave_id_t eid, struct my_struct* input_pointer);
-sgx_status_t ecall_compute_response(sgx_enclave_id_t eid, int i, int j);
-sgx_status_t ecall_get_response(sgx_enclave_id_t eid);
-sgx_status_t ecall_check_secret(sgx_enclave_id_t eid, int s);
+sgx_status_t ecall_setup(sgx_enclave_id_t eid);
+sgx_status_t ecall_get_passwords(sgx_enclave_id_t eid, char* masterpw);
 
 #ifdef __cplusplus
 }
