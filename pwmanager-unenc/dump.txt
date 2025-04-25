@@ -1,0 +1,967 @@
+[===] Enclave [===]
+make[1]: Entering directory '/home/jan/pwmanager-unenc/Enclave'
+echo "[RM]" encl.o asm.o encl.unsigned.so encl.so libencl_proxy.a
+[RM] encl.o asm.o encl.unsigned.so encl.so libencl_proxy.a
+rm -f encl.o asm.o encl.unsigned.so encl.so libencl_proxy.a
+echo "[RM]" encl_t.o encl_u.o  encl_t.h encl_t.c encl_u.h encl_u.c
+[RM] encl_t.o encl_u.o encl_t.h encl_t.c encl_u.h encl_u.c
+rm -f encl_t.o encl_u.o  encl_t.h encl_t.c encl_u.h encl_u.c
+make[1]: Leaving directory '/home/jan/pwmanager-unenc/Enclave'
+[RM] main.o sgx-pin
+[===] Enclave [===]
+make[1]: Entering directory '/home/jan/pwmanager-unenc/Enclave'
+echo "[GEN]" sgx_edger8r encl.edl
+[GEN] sgx_edger8r encl.edl
+sgx_edger8r encl.edl
+echo "[CC] " encl_t.c "(trusted edge)"
+[CC]  encl_t.c (trusted edge)
+touch encl_t.c
+gcc -c -I/opt/intel/sgxsdk/include/ -I/opt/intel/sgxsdk/include/tlibc  -nostdinc -fvisibility=hidden -fpie -fstack-protector -g -Os encl_t.c
+echo "[CC] " encl.c "(core)"
+[CC]  encl.c (core)
+gcc -I/opt/intel/sgxsdk/include/ -I/opt/intel/sgxsdk/include/tlibc  -nostdinc -fvisibility=hidden -fpie -fstack-protector -g -Os -c encl.c
+echo "[AS] " asm.S "(core)"
+[AS]  asm.S (core)
+gcc -I/opt/intel/sgxsdk/include/ -I/opt/intel/sgxsdk/include/tlibc  -nostdinc -fvisibility=hidden -fpie -fstack-protector -g -Os -c asm.S -o asm.o
+echo "[LD]  " encl.o asm.o encl_t.o -lsgx_trts  encl.unsigned.so
+[LD]   encl.o asm.o encl_t.o -lsgx_trts encl.unsigned.so
+gcc encl.o asm.o encl_t.o -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -Wl,--whole-archive -Wl,--start-group -lsgx_trts -Wl,--end-group -Wl,--no-whole-archive -Wl,--start-group -lsgx_tstdc -lsgx_tcrypto -lsgx_tservice -Wl,--end-group -Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined -Wl,-pie,-eenclave_entry -Wl,--export-dynamic -Wl,--defsym,__ImageBase=0 -L /opt/intel/sgxsdk/lib64 -o encl.unsigned.so 
+echo "[SGN]" encl.unsigned.so
+[SGN] encl.unsigned.so
+sgx_sign sign -key private_key.pem -enclave encl.unsigned.so -out encl.so -config encl.config.xml > /dev/null 2> /dev/null
+echo "[CC] " encl_u.c "(untrusted edge)"
+[CC]  encl_u.c (untrusted edge)
+touch encl_u.c
+gcc -c -I/opt/intel/sgxsdk/include/ -I/opt/intel/sgxsdk/include/tlibc  -nostdinc -fvisibility=hidden -fpie -fstack-protector -g encl_u.c
+echo "[AR]  " libencl_proxy.a
+[AR]   libencl_proxy.a
+ar rcs libencl_proxy.a encl_u.o  
+make[1]: Leaving directory '/home/jan/pwmanager-unenc/Enclave'
+[CC]  main.c
+[LD] main.o -lsgx-step -o sgx-pin
+
+--------------------------------------------------------------------------------
+[main.c] Creating enclave...
+--------------------------------------------------------------------------------
+
+victim thread running
+[main.c] ocall_print: enclave says: '[Enclave] Master password initialized successfully.'
+[main.c] ocall_print: enclave says: 'Stored PW 1'
+[main.c] ocall_print: enclave says: 'RikkieTheFrog'
+[main.c] ocall_print: enclave says: 'Stored PW 2'
+[main.c] ocall_print: enclave says: 'SammyTheElephant'
+[main.c] ocall_print: enclave says: 'Stored PW 3'
+[main.c] ocall_print: enclave says: 'AlfredoTheSheep'
+[main.c] ocall_print: enclave says: 'RikkieTheFrog'
+[main.c] ocall_print: enclave says: 'SammyTheElephant'
+[main.c] ocall_print: enclave says: 'AlfredoTheSheep'
+[sched.c] continuing on CPU 1
+[enclave.c] tcs at 7fb74fa00000; aep at 7fb75062e4fc
+==== Victim Enclave ====
+    Driver: /dev/sgx_enclave
+    Base:   0x7fb74f800000
+    Limit:  0x7fb74fa14000
+    Size:   2179072
+    Exec:   18 pages
+    TCS:    0x7fb74fa00000
+    SSA:    0x7fb74fa00f48
+    AEP:    0x7fb75062e4fc
+    EDBGRD: debug
+[main.c] enclave trigger at 0x7fb74f802000; code at 0x7fb74f802227
+[main.c] pf handler
+[main.c] Caught page fault (base address=0x7fb74f802000)
+[main.c] Restoring trigger access rights..
+[main.c] aep
+stepcnt 1
+[main.c] ^^ enclave RIP=0x2227
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 2
+[main.c] ^^ enclave RIP=0x222b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 3
+[main.c] ^^ enclave RIP=0x222c
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 4
+[main.c] ^^ enclave RIP=0x2233
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 5
+[main.c] ^^ enclave RIP=0x2238
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 6
+[main.c] ^^ enclave RIP=0x223b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 7
+[main.c] ^^ enclave RIP=0x10d40
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 8
+[main.c] ^^ enclave RIP=0x10d44
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 9
+[main.c] ^^ enclave RIP=0x10d46
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 10
+[main.c] ^^ enclave RIP=0x10d49
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 11
+[main.c] ^^ enclave RIP=0x10d4b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 12
+[main.c] ^^ enclave RIP=0x10d4d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 13
+[main.c] ^^ enclave RIP=0x10d5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 14
+[main.c] ^^ enclave RIP=0x10d61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 15
+[main.c] ^^ enclave RIP=0x10d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 16
+[main.c] ^^ enclave RIP=0x10d69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 17
+[main.c] ^^ enclave RIP=0x10d50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 18
+[main.c] ^^ enclave RIP=0x10d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 19
+[main.c] ^^ enclave RIP=0x10d54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 20
+[main.c] ^^ enclave RIP=0x10d58
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 21
+[main.c] ^^ enclave RIP=0x10d5b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 22
+[main.c] ^^ enclave RIP=0x10d5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 23
+[main.c] ^^ enclave RIP=0x10d61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 24
+[main.c] ^^ enclave RIP=0x10d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 25
+[main.c] ^^ enclave RIP=0x10d69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 26
+[main.c] ^^ enclave RIP=0x10d50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 27
+[main.c] ^^ enclave RIP=0x10d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 28
+[main.c] ^^ enclave RIP=0x10d54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 29
+[main.c] ^^ enclave RIP=0x10d58
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 30
+[main.c] ^^ enclave RIP=0x10d5b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 31
+[main.c] ^^ enclave RIP=0x10d5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 32
+[main.c] ^^ enclave RIP=0x10d61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 33
+[main.c] ^^ enclave RIP=0x10d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 34
+[main.c] ^^ enclave RIP=0x10d69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 35
+[main.c] ^^ enclave RIP=0x10d50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 36
+[main.c] ^^ enclave RIP=0x10d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 37
+[main.c] ^^ enclave RIP=0x10d54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 38
+[main.c] ^^ enclave RIP=0x10d58
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 39
+[main.c] ^^ enclave RIP=0x10d5b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 40
+[main.c] ^^ enclave RIP=0x10d5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 41
+[main.c] ^^ enclave RIP=0x10d61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 42
+[main.c] ^^ enclave RIP=0x10d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 43
+[main.c] ^^ enclave RIP=0x10d69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 44
+[main.c] ^^ enclave RIP=0x10d50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 45
+[main.c] ^^ enclave RIP=0x10d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 46
+[main.c] ^^ enclave RIP=0x10d54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 47
+[main.c] ^^ enclave RIP=0x10d58
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 48
+[main.c] ^^ enclave RIP=0x10d5b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 49
+[main.c] ^^ enclave RIP=0x10d5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 50
+[main.c] ^^ enclave RIP=0x10d61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 51
+[main.c] ^^ enclave RIP=0x10d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 52
+[main.c] ^^ enclave RIP=0x10d69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 53
+[main.c] ^^ enclave RIP=0x10d50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 54
+[main.c] ^^ enclave RIP=0x10d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 55
+[main.c] ^^ enclave RIP=0x10d54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 56
+[main.c] ^^ enclave RIP=0x10d58
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 57
+[main.c] ^^ enclave RIP=0x10d5b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 58
+[main.c] ^^ enclave RIP=0x10d5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 59
+[main.c] ^^ enclave RIP=0x10d61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 60
+[main.c] ^^ enclave RIP=0x10d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 61
+[main.c] ^^ enclave RIP=0x10d69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 62
+[main.c] ^^ enclave RIP=0x10d50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 63
+[main.c] ^^ enclave RIP=0x10d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 64
+[main.c] ^^ enclave RIP=0x10d54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 65
+[main.c] ^^ enclave RIP=0x10d58
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 66
+[main.c] ^^ enclave RIP=0x10d5b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 67
+[main.c] ^^ enclave RIP=0x10d5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 68
+[main.c] ^^ enclave RIP=0x10d61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 69
+[main.c] ^^ enclave RIP=0x10d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 70
+[main.c] ^^ enclave RIP=0x10d69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 71
+[main.c] ^^ enclave RIP=0x10d50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 72
+[main.c] ^^ enclave RIP=0x10d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 73
+[main.c] ^^ enclave RIP=0x10d54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 74
+[main.c] ^^ enclave RIP=0x10d58
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 75
+[main.c] ^^ enclave RIP=0x10d5b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 76
+[main.c] ^^ enclave RIP=0x10d5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 77
+[main.c] ^^ enclave RIP=0x10d61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 78
+[main.c] ^^ enclave RIP=0x10d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 79
+[main.c] ^^ enclave RIP=0x10d69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 80
+[main.c] ^^ enclave RIP=0x10d50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 81
+[main.c] ^^ enclave RIP=0x10d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 82
+[main.c] ^^ enclave RIP=0x10d54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 83
+[main.c] ^^ enclave RIP=0x10d58
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 84
+[main.c] ^^ enclave RIP=0x10d5b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 85
+[main.c] ^^ enclave RIP=0x10d5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 86
+[main.c] ^^ enclave RIP=0x10d61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 87
+[main.c] ^^ enclave RIP=0x10d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 88
+[main.c] ^^ enclave RIP=0x10d69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 89
+[main.c] ^^ enclave RIP=0x10d50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 90
+[main.c] ^^ enclave RIP=0x10d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 91
+[main.c] ^^ enclave RIP=0x10d54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 92
+[main.c] ^^ enclave RIP=0x10d58
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 93
+[main.c] ^^ enclave RIP=0x10d5b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 94
+[main.c] ^^ enclave RIP=0x10d5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 95
+[main.c] ^^ enclave RIP=0x10d61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 96
+[main.c] ^^ enclave RIP=0x10d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 97
+[main.c] ^^ enclave RIP=0x10d69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 98
+[main.c] ^^ enclave RIP=0x10d50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 99
+[main.c] ^^ enclave RIP=0x10d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 100
+[main.c] ^^ enclave RIP=0x10d54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 101
+[main.c] ^^ enclave RIP=0x10d58
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 102
+[main.c] ^^ enclave RIP=0x10d5b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 103
+[main.c] ^^ enclave RIP=0x10d5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 104
+[main.c] ^^ enclave RIP=0x10d61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 105
+[main.c] ^^ enclave RIP=0x10d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 106
+[main.c] ^^ enclave RIP=0x10d69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 107
+[main.c] ^^ enclave RIP=0x10d50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 108
+[main.c] ^^ enclave RIP=0x10d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 109
+[main.c] ^^ enclave RIP=0x10d54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 110
+[main.c] ^^ enclave RIP=0x10d58
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 111
+[main.c] ^^ enclave RIP=0x10d5b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 112
+[main.c] ^^ enclave RIP=0x10d5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 113
+[main.c] ^^ enclave RIP=0x10d61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 114
+[main.c] ^^ enclave RIP=0x10d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 115
+[main.c] ^^ enclave RIP=0x10d69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 116
+[main.c] ^^ enclave RIP=0x10d50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 117
+[main.c] ^^ enclave RIP=0x10d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 118
+[main.c] ^^ enclave RIP=0x10d54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 119
+[main.c] ^^ enclave RIP=0x10d58
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 120
+[main.c] ^^ enclave RIP=0x10d5b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 121
+[main.c] ^^ enclave RIP=0x10d5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 122
+[main.c] ^^ enclave RIP=0x10d61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 123
+[main.c] ^^ enclave RIP=0x10d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 124
+[main.c] ^^ enclave RIP=0x10d69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 125
+[main.c] ^^ enclave RIP=0x10d50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 126
+[main.c] ^^ enclave RIP=0x10d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 127
+[main.c] ^^ enclave RIP=0x10d78
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 128
+[main.c] ^^ enclave RIP=0x10d7a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 129
+[main.c] ^^ enclave RIP=0x2240
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 130
+[main.c] ^^ enclave RIP=0x2242
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 131
+[main.c] ^^ enclave RIP=0x2251
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 132
+[main.c] ^^ enclave RIP=0x2256
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 133
+[main.c] ^^ enclave RIP=0x2259
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 134
+[main.c] ^^ enclave RIP=0x2260
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 135
+[main.c] ^^ enclave RIP=0x2260
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 136
+[main.c] ^^ enclave RIP=0x2260
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 137
+[main.c] ^^ enclave RIP=0x2260
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 138
+[main.c] ^^ enclave RIP=0x2260
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 139
+[main.c] ^^ enclave RIP=0x2260
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 140
+[main.c] ^^ enclave RIP=0x2260
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 141
+[main.c] ^^ enclave RIP=0x2260
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 142
+[main.c] ^^ enclave RIP=0x2262
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 143
+[main.c] ^^ enclave RIP=0x2269
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 144
+[main.c] ^^ enclave RIP=0x226b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 145
+[main.c] ^^ enclave RIP=0x226e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 146
+[main.c] ^^ enclave RIP=0x2273
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x56194cd19a42)
+
+[main.c] aep
+stepcnt 147
+[main.c] ^^ enclave RIP=0x2277
+[main.c] testreach
+attacker thread running
+[main.c] aep
+stepcnt 148
+[main.c] ^^ enclave RIP=0x1258c
+[main.c] aep
+stepcnt 149
+[main.c] ^^ enclave RIP=0x125ac
+[main.c] aep
+stepcnt 150
+[main.c] ^^ enclave RIP=0x126d9
+[main.c] ocall_print: enclave says: '[Enclave] Master password initialized successfully.'
+[main.c] ocall_print: enclave says: 'RikkieTheFrog'
+[main.c] ocall_print: enclave says: 'SammyTheElephant'
+[main.c] ocall_print: enclave says: 'AlfredoTheSheep'
