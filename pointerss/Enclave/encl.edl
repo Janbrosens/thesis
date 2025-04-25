@@ -9,8 +9,8 @@ enclave {
         public void ecall_update_response_loc([user_check] struct my_struct* input_pointer);
         public void ecall_compute_response(int i, int j);
         public void ecall_get_response();
-        public void ecall_check_secret(int s);
-
+        public void ecall_get_secret(int pin, [out, size=max_len] char* out_buf, size_t max_len);
+        
     };
 
    

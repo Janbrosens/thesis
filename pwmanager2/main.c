@@ -53,6 +53,10 @@ void ocall_print_address(const char *str, uint64_t a)
 {
     info("ocall_print_address: enclave says: '%s' '%p'",str, (void*)a);
 }
+
+void ocall_print_password(const char *pw) {
+    printf("Decrypted password: %s\n", pw);
+}
 /* ================== ATTACKER IRQ/FAULT HANDLERS ================= */
 
 /* Called before resuming the enclave after an Asynchronous Enclave eXit. */
@@ -200,10 +204,16 @@ int main( int argc, char **argv )
     int rv = 1, secret = 1;
 
     
-    //Dry run  For some reason this fucks up single stepping VRAAG
+    char* masterpw = "super_secret";
     ecall_setup(eid);
-    char* masterpw = "secret";
     ecall_get_passwords(eid, masterpw);
+    ecall_add_password(eid, masterpw, "jeffrey");
+    ecall_get_passwords(eid, masterpw);
+
+    ecall_clear_all(eid, masterpw);
+    ecall_get_passwords(eid, "");
+
+    
     
 
      /* 1. Setup attack execution environment. */

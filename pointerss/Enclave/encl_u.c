@@ -10,9 +10,11 @@ typedef struct ms_ecall_compute_response_t {
 	int ms_j;
 } ms_ecall_compute_response_t;
 
-typedef struct ms_ecall_check_secret_t {
-	int ms_s;
-} ms_ecall_check_secret_t;
+typedef struct ms_ecall_get_secret_t {
+	int ms_pin;
+	char* ms_out_buf;
+	size_t ms_max_len;
+} ms_ecall_get_secret_t;
 
 typedef struct ms_ocall_print_t {
 	const char* ms_str;
@@ -75,11 +77,13 @@ sgx_status_t ecall_get_response(sgx_enclave_id_t eid)
 	return status;
 }
 
-sgx_status_t ecall_check_secret(sgx_enclave_id_t eid, int s)
+sgx_status_t ecall_get_secret(sgx_enclave_id_t eid, int pin, char* out_buf, size_t max_len)
 {
 	sgx_status_t status;
-	ms_ecall_check_secret_t ms;
-	ms.ms_s = s;
+	ms_ecall_get_secret_t ms;
+	ms.ms_pin = pin;
+	ms.ms_out_buf = out_buf;
+	ms.ms_max_len = max_len;
 	status = sgx_ecall(eid, 3, &ocall_table_encl, &ms);
 	return status;
 }

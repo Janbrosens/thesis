@@ -36,7 +36,7 @@ void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_print_address, (const char* str, uint64
 sgx_status_t ecall_update_response_loc(sgx_enclave_id_t eid, struct my_struct* input_pointer);
 sgx_status_t ecall_compute_response(sgx_enclave_id_t eid, int i, int j);
 sgx_status_t ecall_get_response(sgx_enclave_id_t eid);
-sgx_status_t ecall_check_secret(sgx_enclave_id_t eid, int s);
+sgx_status_t ecall_get_secret(sgx_enclave_id_t eid, int pin, char* out_buf, size_t max_len);
 
 #ifdef __cplusplus
 }

@@ -5,7 +5,8 @@
 #include "../mystruct.h"
 #include "sgx_trts.h"
 
-int secret = 1234;
+char* secret = "super_secret";
+int pincode = 1234;
 
 struct my_struct msp;
 
@@ -33,10 +34,12 @@ void ecall_get_response(){
 
 }
 
-void ecall_check_secret(int s){
-    if(s == secret){
-        ocall_print("Secret ok");
-    }else{
-        ocall_print("Secret wrong");
+void ecall_get_secret(int pin, char* out_buf, size_t max_len) {
+    if (pin == pincode) {
+        strncpy(out_buf, secret, max_len - 1);
+    } else {
+        strncpy(out_buf, "Pincode is wrong", max_len - 1);
     }
+    out_buf[max_len - 1] = '\0'; // Always null-terminate
 }
+

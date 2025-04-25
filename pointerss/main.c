@@ -61,6 +61,8 @@ void aep_cb_func(void)
     info("aep");
     step_cnt++;
     printf("stepcnt %d\n", step_cnt);
+    uint64_t erip = edbgrd_erip() - (uint64_t) get_enclave_base();
+    info("^^ enclave RIP=%#llx", erip);
     
     
     //  0x208d
@@ -236,7 +238,9 @@ void* thread_B(void* arg) {
     
     sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
     ecall_compute_response(eidarg, 2, 4);
-    ecall_check_secret(eidarg, 8);
+    char buffer[64];  // must be large enough to hold the secret or error message
+    ecall_get_secret(eidarg, 8, buffer, sizeof(buffer));
+    printf("%s\n", buffer);
 
 
     // CHANGE FROM THREAD B TO THREAD A

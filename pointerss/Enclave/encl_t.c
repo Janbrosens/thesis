@@ -36,9 +36,11 @@ typedef struct ms_ecall_compute_response_t {
 	int ms_j;
 } ms_ecall_compute_response_t;
 
-typedef struct ms_ecall_check_secret_t {
-	int ms_s;
-} ms_ecall_check_secret_t;
+typedef struct ms_ecall_get_secret_t {
+	int ms_pin;
+	char* ms_out_buf;
+	size_t ms_max_len;
+} ms_ecall_get_secret_t;
 
 typedef struct ms_ocall_print_t {
 	const char* ms_str;
@@ -100,24 +102,54 @@ static sgx_status_t SGX_CDECL sgx_ecall_get_response(void* pms)
 	return status;
 }
 
-static sgx_status_t SGX_CDECL sgx_ecall_check_secret(void* pms)
+static sgx_status_t SGX_CDECL sgx_ecall_get_secret(void* pms)
 {
-	CHECK_REF_POINTER(pms, sizeof(ms_ecall_check_secret_t));
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_get_secret_t));
 	//
 	// fence after pointer checks
 	//
 	sgx_lfence();
-	ms_ecall_check_secret_t* ms = SGX_CAST(ms_ecall_check_secret_t*, pms);
-	ms_ecall_check_secret_t __in_ms;
-	if (memcpy_s(&__in_ms, sizeof(ms_ecall_check_secret_t), ms, sizeof(ms_ecall_check_secret_t))) {
+	ms_ecall_get_secret_t* ms = SGX_CAST(ms_ecall_get_secret_t*, pms);
+	ms_ecall_get_secret_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_ecall_get_secret_t), ms, sizeof(ms_ecall_get_secret_t))) {
 		return SGX_ERROR_UNEXPECTED;
 	}
 	sgx_status_t status = SGX_SUCCESS;
+	char* _tmp_out_buf = __in_ms.ms_out_buf;
+	size_t _tmp_max_len = __in_ms.ms_max_len;
+	size_t _len_out_buf = _tmp_max_len;
+	char* _in_out_buf = NULL;
 
+	CHECK_UNIQUE_POINTER(_tmp_out_buf, _len_out_buf);
 
-	ecall_check_secret(__in_ms.ms_s);
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
 
+	if (_tmp_out_buf != NULL && _len_out_buf != 0) {
+		if ( _len_out_buf % sizeof(*_tmp_out_buf) != 0)
+		{
+			status = SGX_ERROR_INVALID_PARAMETER;
+			goto err;
+		}
+		if ((_in_out_buf = (char*)malloc(_len_out_buf)) == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
 
+		memset((void*)_in_out_buf, 0, _len_out_buf);
+	}
+	ecall_get_secret(__in_ms.ms_pin, _in_out_buf, _tmp_max_len);
+	if (_in_out_buf) {
+		if (memcpy_verw_s(_tmp_out_buf, _len_out_buf, _in_out_buf, _len_out_buf)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+	}
+
+err:
+	if (_in_out_buf) free(_in_out_buf);
 	return status;
 }
 
@@ -130,7 +162,7 @@ SGX_EXTERNC const struct {
 		{(void*)(uintptr_t)sgx_ecall_update_response_loc, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_compute_response, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_get_response, 0, 0},
-		{(void*)(uintptr_t)sgx_ecall_check_secret, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_get_secret, 0, 0},
 	}
 };
 
