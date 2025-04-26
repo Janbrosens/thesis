@@ -69,7 +69,7 @@ void aep_cb_func(void)
     info("^^ enclave RIP=%#llx", erip);
 
     
-    if(step_cnt == 147){ // logout between line 38 and 39
+    if(step_cnt == 912){ // logout between line 38 and 39
         info("testreach");
         sgx_step_do_trap = 0;
 
