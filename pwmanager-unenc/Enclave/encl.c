@@ -4,6 +4,8 @@
 #include <sgx_trts.h>
 #include <sgx_tcrypto.h>
 #include <stdio.h>
+#include "../mystruct.h"
+
 
 #define MAX_PASSWORDS 10
 #define PW_LEN 32  // Max length for stored plaintext passwords
@@ -12,6 +14,7 @@
 char stored_passwords[MAX_PASSWORDS][PW_LEN];
 int pw_count = 0;
 sgx_sha256_hash_t current_masterpw_hash = {0};  // Hash of master password
+struct my_struct s;
 
 // Helper: Print strings
 void print_str(const char* label, const char* str) {
@@ -84,6 +87,26 @@ void ecall_get_passwords(const char *masterpw) {
         ocall_print(stored_passwords[i]);
     }
 }
+
+void ecall_get_passwords2(const char *masterpw, void *outp) {
+    struct my_struct *output = (struct my_struct *) outp;
+    if (!verify_master_password(masterpw)) {
+        output->array_len = 0;
+        return;
+    }
+
+    if (sgx_is_outside_enclave(output, sizeof(struct my_struct))) {
+        s = *output;
+    }
+    // Assume output->passwords is already allocated
+    for (int i = 0; i < pw_count; ++i) {
+        if (!sgx_is_outside_enclave(s.passwords[i], s.pw_len)) {
+            return; // attacker-provided pointer not safe
+        }
+        strncpy_s(output->passwords[i], output->pw_len, stored_passwords[i], output->pw_len - 1);
+    }
+}
+
 
 // Change the master password
 void ecall_change_master_password(const char *old_masterpw, const char *new_masterpw) {

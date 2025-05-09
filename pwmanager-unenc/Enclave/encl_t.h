@@ -18,7 +18,7 @@ extern "C" {
 void ecall_setup(void);
 void ecall_add_password(const char* masterpw, const char* plaintext_pw);
 void ecall_change_master_password(const char* old_masterpw, const char* new_masterpw);
-void ecall_get_passwords(const char* masterpw);
+void ecall_get_passwords2(const char* masterpw, void* output);
 void ecall_init_master_password(const char* masterpw);
 void ecall_clear_all(const char* masterpw);
 
