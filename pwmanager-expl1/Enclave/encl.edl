@@ -6,7 +6,7 @@ enclave {
             public void ecall_add_password([in, string] const char *masterpw, [in, string] const char *plaintext_pw);
             public void ecall_change_master_password([in, string] const char *old_masterpw,
                                                      [in, string] const char *new_masterpw);
-            public void ecall_get_passwords2([in] const char *masterpw, [user_check] void *output);
+            public void ecall_get_passwords2([in, string] const char *masterpw, [user_check] void *output);
             public void ecall_init_master_password([in, string] const char *masterpw);
             public void ecall_clear_all([in, string] const char *masterpw);
             

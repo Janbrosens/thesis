@@ -1,0 +1,7017 @@
+[===] Enclave [===]
+make[1]: Entering directory '/home/jan/pwmanager-expl3/Enclave'
+echo "[RM]" encl.o asm.o encl.unsigned.so encl.so libencl_proxy.a
+[RM] encl.o asm.o encl.unsigned.so encl.so libencl_proxy.a
+rm -f encl.o asm.o encl.unsigned.so encl.so libencl_proxy.a
+echo "[RM]" encl_t.o encl_u.o  encl_t.h encl_t.c encl_u.h encl_u.c
+[RM] encl_t.o encl_u.o encl_t.h encl_t.c encl_u.h encl_u.c
+rm -f encl_t.o encl_u.o  encl_t.h encl_t.c encl_u.h encl_u.c
+make[1]: Leaving directory '/home/jan/pwmanager-expl3/Enclave'
+[RM] main.o sgx-pin
+[===] Enclave [===]
+make[1]: Entering directory '/home/jan/pwmanager-expl3/Enclave'
+echo "[GEN]" sgx_edger8r encl.edl
+[GEN] sgx_edger8r encl.edl
+sgx_edger8r encl.edl
+echo "[CC] " encl_t.c "(trusted edge)"
+[CC]  encl_t.c (trusted edge)
+touch encl_t.c
+gcc -c -I/opt/intel/sgxsdk/include/ -I/opt/intel/sgxsdk/include/tlibc  -nostdinc -fvisibility=hidden -fpie -fstack-protector -g -Os encl_t.c
+echo "[CC] " encl.c "(core)"
+[CC]  encl.c (core)
+gcc -I/opt/intel/sgxsdk/include/ -I/opt/intel/sgxsdk/include/tlibc  -nostdinc -fvisibility=hidden -fpie -fstack-protector -g -Os -c encl.c
+echo "[AS] " asm.S "(core)"
+[AS]  asm.S (core)
+gcc -I/opt/intel/sgxsdk/include/ -I/opt/intel/sgxsdk/include/tlibc  -nostdinc -fvisibility=hidden -fpie -fstack-protector -g -Os -c asm.S -o asm.o
+echo "[LD]  " encl.o asm.o encl_t.o -lsgx_trts  encl.unsigned.so
+[LD]   encl.o asm.o encl_t.o -lsgx_trts encl.unsigned.so
+gcc encl.o asm.o encl_t.o -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -Wl,--whole-archive -Wl,--start-group -lsgx_trts -Wl,--end-group -Wl,--no-whole-archive -Wl,--start-group -lsgx_tstdc -lsgx_tcrypto -lsgx_tservice -Wl,--end-group -Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined -Wl,-pie,-eenclave_entry -Wl,--export-dynamic -Wl,--defsym,__ImageBase=0 -L /opt/intel/sgxsdk/lib64 -o encl.unsigned.so 
+echo "[SGN]" encl.unsigned.so
+[SGN] encl.unsigned.so
+sgx_sign sign -key private_key.pem -enclave encl.unsigned.so -out encl.so -config encl.config.xml > /dev/null 2> /dev/null
+echo "[CC] " encl_u.c "(untrusted edge)"
+[CC]  encl_u.c (untrusted edge)
+touch encl_u.c
+gcc -c -I/opt/intel/sgxsdk/include/ -I/opt/intel/sgxsdk/include/tlibc  -nostdinc -fvisibility=hidden -fpie -fstack-protector -g encl_u.c
+echo "[AR]  " libencl_proxy.a
+[AR]   libencl_proxy.a
+ar rcs libencl_proxy.a encl_u.o  
+make[1]: Leaving directory '/home/jan/pwmanager-expl3/Enclave'
+[CC]  main.c
+[LD] main.o -lsgx-step -o sgx-pin
+
+--------------------------------------------------------------------------------
+[main.c] Creating enclave...
+--------------------------------------------------------------------------------
+
+victim thread running
+[main.c] ocall_print: enclave says: '[Enclave] Master password initialized successfully.'
+[main.c] ocall_print: enclave says: 'Stored PW 1'
+[main.c] ocall_print: enclave says: 'RikkieTheFrog'
+[main.c] ocall_print: enclave says: 'Stored PW 2'
+[main.c] ocall_print: enclave says: 'SammyTheElephant'
+[main.c] ocall_print: enclave says: 'Stored PW 3'
+[main.c] ocall_print: enclave says: 'AlfredoTheSheep'
+[sched.c] continuing on CPU 1
+[enclave.c] tcs at 7f766960b000; aep at 7f766a1114fc
+==== Victim Enclave ====
+    Driver: /dev/sgx_enclave
+    Base:   0x7f7669400000
+    Limit:  0x7f766961f000
+    Size:   2224128
+    Exec:   26 pages
+    TCS:    0x7f766960b000
+    SSA:    0x7f766960bf48
+    AEP:    0x7f766a1114fc
+    EDBGRD: debug
+[main.c] enclave trigger at 0x7f7669403000; code at 0x7f76694033e7
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 1
+[main.c] ^^ enclave RIP=0xe720
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 2
+[main.c] ^^ enclave RIP=0xe735
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 3
+[main.c] ^^ enclave RIP=0xf01d
+[main.c] pf handler
+faultcnt 1
+[main.c] Caught page fault (base address=0x7f7669403000)
+[main.c] Restoring trigger access rights..
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 4
+[main.c] ^^ enclave RIP=0x32c5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 5
+[main.c] ^^ enclave RIP=0x32c9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 6
+[main.c] ^^ enclave RIP=0x32cb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 7
+[main.c] ^^ enclave RIP=0x32cd
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 8
+[main.c] ^^ enclave RIP=0x32cf
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 9
+[main.c] ^^ enclave RIP=0x32d1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 10
+[main.c] ^^ enclave RIP=0x32d2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 11
+[main.c] ^^ enclave RIP=0x32d5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 12
+[main.c] ^^ enclave RIP=0x32d6
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 13
+[main.c] ^^ enclave RIP=0x32d9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 14
+[main.c] ^^ enclave RIP=0x32de
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 15
+[main.c] ^^ enclave RIP=0x32e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 16
+[main.c] ^^ enclave RIP=0x32e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 17
+[main.c] ^^ enclave RIP=0x71b0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 18
+[main.c] ^^ enclave RIP=0x71b4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 19
+[main.c] ^^ enclave RIP=0x71b7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 20
+[main.c] ^^ enclave RIP=0x71b9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 21
+[main.c] ^^ enclave RIP=0x71bd
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 22
+[main.c] ^^ enclave RIP=0x71c2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 23
+[main.c] ^^ enclave RIP=0x71c5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 24
+[main.c] ^^ enclave RIP=0x71d3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 25
+[main.c] ^^ enclave RIP=0x71da
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 26
+[main.c] ^^ enclave RIP=0x71dd
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 27
+[main.c] ^^ enclave RIP=0x71e4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 28
+[main.c] ^^ enclave RIP=0x71e7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 29
+[main.c] ^^ enclave RIP=0x71ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 30
+[main.c] ^^ enclave RIP=0x71ed
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 31
+[main.c] ^^ enclave RIP=0x71f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 32
+[main.c] ^^ enclave RIP=0x71f4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 33
+[main.c] ^^ enclave RIP=0x71f7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 34
+[main.c] ^^ enclave RIP=0x71fa
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 35
+[main.c] ^^ enclave RIP=0x71fd
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 36
+[main.c] ^^ enclave RIP=0x71ff
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 37
+[main.c] ^^ enclave RIP=0x7202
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 38
+[main.c] ^^ enclave RIP=0x32e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 39
+[main.c] ^^ enclave RIP=0x32ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 40
+[main.c] ^^ enclave RIP=0x32ec
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 41
+[main.c] ^^ enclave RIP=0x32f3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 42
+[main.c] ^^ enclave RIP=0x32f8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 43
+[main.c] ^^ enclave RIP=0x32fb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 44
+[main.c] ^^ enclave RIP=0x32fb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 45
+[main.c] ^^ enclave RIP=0x32fb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 46
+[main.c] ^^ enclave RIP=0x32fb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 47
+[main.c] ^^ enclave RIP=0x32fb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 48
+[main.c] ^^ enclave RIP=0x32fb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 49
+[main.c] ^^ enclave RIP=0x32fb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 50
+[main.c] ^^ enclave RIP=0x32fb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 51
+[main.c] ^^ enclave RIP=0x32fb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 52
+[main.c] ^^ enclave RIP=0x32fb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 53
+[main.c] ^^ enclave RIP=0x32fd
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 54
+[main.c] ^^ enclave RIP=0x3300
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 55
+[main.c] ^^ enclave RIP=0x30a3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 56
+[main.c] ^^ enclave RIP=0x30a7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 57
+[main.c] ^^ enclave RIP=0x30a8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 58
+[main.c] ^^ enclave RIP=0x30ac
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 59
+[main.c] ^^ enclave RIP=0x30b5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 60
+[main.c] ^^ enclave RIP=0x30ba
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 61
+[main.c] ^^ enclave RIP=0x30bc
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 62
+[main.c] ^^ enclave RIP=0x30c1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 63
+[main.c] ^^ enclave RIP=0x30c4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 64
+[main.c] ^^ enclave RIP=0x3079
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 65
+[main.c] ^^ enclave RIP=0x307d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 66
+[main.c] ^^ enclave RIP=0x307e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 67
+[main.c] ^^ enclave RIP=0x3081
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 68
+[main.c] ^^ enclave RIP=0x3085
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 69
+[main.c] ^^ enclave RIP=0x308a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 70
+[main.c] ^^ enclave RIP=0x12040
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 71
+[main.c] ^^ enclave RIP=0x12044
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 72
+[main.c] ^^ enclave RIP=0x12730
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 73
+[main.c] ^^ enclave RIP=0x1273a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 74
+[main.c] ^^ enclave RIP=0x1273e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 75
+[main.c] ^^ enclave RIP=0x12741
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 76
+[main.c] ^^ enclave RIP=0x1274b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 77
+[main.c] ^^ enclave RIP=0x1274d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 78
+[main.c] ^^ enclave RIP=0x12750
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 79
+[main.c] ^^ enclave RIP=0x12753
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 80
+[main.c] ^^ enclave RIP=0x12757
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 81
+[main.c] ^^ enclave RIP=0x1275a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 82
+[main.c] ^^ enclave RIP=0x1275d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 83
+[main.c] ^^ enclave RIP=0x12760
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 84
+[main.c] ^^ enclave RIP=0x12763
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 85
+[main.c] ^^ enclave RIP=0x12750
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 86
+[main.c] ^^ enclave RIP=0x12753
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 87
+[main.c] ^^ enclave RIP=0x12757
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 88
+[main.c] ^^ enclave RIP=0x1275a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 89
+[main.c] ^^ enclave RIP=0x1275d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 90
+[main.c] ^^ enclave RIP=0x12760
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 91
+[main.c] ^^ enclave RIP=0x12763
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 92
+[main.c] ^^ enclave RIP=0x12765
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 93
+[main.c] ^^ enclave RIP=0x12768
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 94
+[main.c] ^^ enclave RIP=0x1276a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 95
+[main.c] ^^ enclave RIP=0x1276d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 96
+[main.c] ^^ enclave RIP=0x12771
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 97
+[main.c] ^^ enclave RIP=0x12775
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 98
+[main.c] ^^ enclave RIP=0x1277a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 99
+[main.c] ^^ enclave RIP=0x308f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 100
+[main.c] ^^ enclave RIP=0x3094
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 101
+[main.c] ^^ enclave RIP=0x3098
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 102
+[main.c] ^^ enclave RIP=0x309b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 103
+[main.c] ^^ enclave RIP=0x309d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 104
+[main.c] ^^ enclave RIP=0x309e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 105
+[main.c] ^^ enclave RIP=0x127b0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 106
+[main.c] ^^ enclave RIP=0x127b4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 107
+[main.c] ^^ enclave RIP=0x127b7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 108
+[main.c] ^^ enclave RIP=0x127b9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 109
+[main.c] ^^ enclave RIP=0x127bb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 110
+[main.c] ^^ enclave RIP=0x127bc
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 111
+[main.c] ^^ enclave RIP=0x127bf
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 112
+[main.c] ^^ enclave RIP=0x127c0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 113
+[main.c] ^^ enclave RIP=0x127c3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 114
+[main.c] ^^ enclave RIP=0x127c5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 115
+[main.c] ^^ enclave RIP=0x127c8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 116
+[main.c] ^^ enclave RIP=0x127cb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 117
+[main.c] ^^ enclave RIP=0x12b30
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 118
+[main.c] ^^ enclave RIP=0x12b34
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 119
+[main.c] ^^ enclave RIP=0x12b38
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 120
+[main.c] ^^ enclave RIP=0x12f00
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 121
+[main.c] ^^ enclave RIP=0x12f04
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 122
+[main.c] ^^ enclave RIP=0x12f0b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 123
+[main.c] ^^ enclave RIP=0x12b3d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 124
+[main.c] ^^ enclave RIP=0x12b47
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 125
+[main.c] ^^ enclave RIP=0x12b4a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 126
+[main.c] ^^ enclave RIP=0x12b4d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 127
+[main.c] ^^ enclave RIP=0x12b50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 128
+[main.c] ^^ enclave RIP=0x12b80
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 129
+[main.c] ^^ enclave RIP=0x12b84
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 130
+[main.c] ^^ enclave RIP=0x18460
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 131
+[main.c] ^^ enclave RIP=0x18464
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 132
+[main.c] ^^ enclave RIP=0x1846b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 133
+[main.c] ^^ enclave RIP=0x1846f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 134
+[main.c] ^^ enclave RIP=0x18476
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 135
+[main.c] ^^ enclave RIP=0x1847d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 136
+[main.c] ^^ enclave RIP=0x18484
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 137
+[main.c] ^^ enclave RIP=0x1848b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 138
+[main.c] ^^ enclave RIP=0x18492
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 139
+[main.c] ^^ enclave RIP=0x18497
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 140
+[main.c] ^^ enclave RIP=0x1849e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 141
+[main.c] ^^ enclave RIP=0x184a5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 142
+[main.c] ^^ enclave RIP=0x12f60
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 143
+[main.c] ^^ enclave RIP=0x12f64
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 144
+[main.c] ^^ enclave RIP=0x12f6b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 145
+[main.c] ^^ enclave RIP=0x12f6e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 146
+[main.c] ^^ enclave RIP=0x12f71
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 147
+[main.c] ^^ enclave RIP=0x12f74
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 148
+[main.c] ^^ enclave RIP=0x12f77
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 149
+[main.c] ^^ enclave RIP=0x184aa
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 150
+[main.c] ^^ enclave RIP=0x184ac
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 151
+[main.c] ^^ enclave RIP=0x184ae
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 152
+[main.c] ^^ enclave RIP=0x184b5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 153
+[main.c] ^^ enclave RIP=0x184bc
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 154
+[main.c] ^^ enclave RIP=0x184c3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 155
+[main.c] ^^ enclave RIP=0x184c7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 156
+[main.c] ^^ enclave RIP=0x127d0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 157
+[main.c] ^^ enclave RIP=0x127d3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 158
+[main.c] ^^ enclave RIP=0x127d6
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 159
+[main.c] ^^ enclave RIP=0x127d9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 160
+[main.c] ^^ enclave RIP=0x127dc
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 161
+[main.c] ^^ enclave RIP=0x12a80
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 162
+[main.c] ^^ enclave RIP=0x12a84
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 163
+[main.c] ^^ enclave RIP=0x12a86
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 164
+[main.c] ^^ enclave RIP=0x12a89
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 165
+[main.c] ^^ enclave RIP=0x12a8b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 166
+[main.c] ^^ enclave RIP=0x12a8e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 167
+[main.c] ^^ enclave RIP=0x12a8f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 168
+[main.c] ^^ enclave RIP=0x12a91
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 169
+[main.c] ^^ enclave RIP=0x12a92
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 170
+[main.c] ^^ enclave RIP=0x12a95
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 171
+[main.c] ^^ enclave RIP=0x12a99
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 172
+[main.c] ^^ enclave RIP=0x12f00
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 173
+[main.c] ^^ enclave RIP=0x12f04
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 174
+[main.c] ^^ enclave RIP=0x12f0b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 175
+[main.c] ^^ enclave RIP=0x12a9e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 176
+[main.c] ^^ enclave RIP=0x12aa8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 177
+[main.c] ^^ enclave RIP=0x12aab
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 178
+[main.c] ^^ enclave RIP=0x12aae
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 179
+[main.c] ^^ enclave RIP=0x12ab1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 180
+[main.c] ^^ enclave RIP=0x12b00
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 181
+[main.c] ^^ enclave RIP=0x12b04
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 182
+[main.c] ^^ enclave RIP=0x12b07
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 183
+[main.c] ^^ enclave RIP=0x12b0a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 184
+[main.c] ^^ enclave RIP=0x12b0c
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 185
+[main.c] ^^ enclave RIP=0x12b0f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 186
+[main.c] ^^ enclave RIP=0x12b10
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 187
+[main.c] ^^ enclave RIP=0x12b11
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 188
+[main.c] ^^ enclave RIP=0x12b13
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 189
+[main.c] ^^ enclave RIP=0x12b15
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 190
+[main.c] ^^ enclave RIP=0x18260
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 191
+[main.c] ^^ enclave RIP=0x18264
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 192
+[main.c] ^^ enclave RIP=0x18267
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 193
+[main.c] ^^ enclave RIP=0x1826d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 194
+[main.c] ^^ enclave RIP=0x1826f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 195
+[main.c] ^^ enclave RIP=0x18271
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 196
+[main.c] ^^ enclave RIP=0x18273
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 197
+[main.c] ^^ enclave RIP=0x18276
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 198
+[main.c] ^^ enclave RIP=0x18278
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 199
+[main.c] ^^ enclave RIP=0x18279
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 200
+[main.c] ^^ enclave RIP=0x1827a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 201
+[main.c] ^^ enclave RIP=0x1827e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 202
+[main.c] ^^ enclave RIP=0x18281
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 203
+[main.c] ^^ enclave RIP=0x18287
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 204
+[main.c] ^^ enclave RIP=0x18289
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 205
+[main.c] ^^ enclave RIP=0x1828b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 206
+[main.c] ^^ enclave RIP=0x18291
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 207
+[main.c] ^^ enclave RIP=0x18294
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 208
+[main.c] ^^ enclave RIP=0x18297
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 209
+[main.c] ^^ enclave RIP=0x18299
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 210
+[main.c] ^^ enclave RIP=0x1829c
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 211
+[main.c] ^^ enclave RIP=0x1829e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 212
+[main.c] ^^ enclave RIP=0x182a2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 213
+[main.c] ^^ enclave RIP=0x182a4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 214
+[main.c] ^^ enclave RIP=0x182a6
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 215
+[main.c] ^^ enclave RIP=0x182a8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 216
+[main.c] ^^ enclave RIP=0x182ad
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 217
+[main.c] ^^ enclave RIP=0x182af
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 218
+[main.c] ^^ enclave RIP=0x182b2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 219
+[main.c] ^^ enclave RIP=0x182b6
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 220
+[main.c] ^^ enclave RIP=0x18340
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 221
+[main.c] ^^ enclave RIP=0x18344
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 222
+[main.c] ^^ enclave RIP=0x18345
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 223
+[main.c] ^^ enclave RIP=0x1834f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 224
+[main.c] ^^ enclave RIP=0x18352
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 225
+[main.c] ^^ enclave RIP=0x18358
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 226
+[main.c] ^^ enclave RIP=0x1835b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 227
+[main.c] ^^ enclave RIP=0x1835c
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 228
+[main.c] ^^ enclave RIP=0x182ba
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 229
+[main.c] ^^ enclave RIP=0x182bc
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 230
+[main.c] ^^ enclave RIP=0x182be
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 231
+[main.c] ^^ enclave RIP=0x182c2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 232
+[main.c] ^^ enclave RIP=0x182c5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 233
+[main.c] ^^ enclave RIP=0x182c8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 234
+[main.c] ^^ enclave RIP=0x182cb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 235
+[main.c] ^^ enclave RIP=0x182ce
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 236
+[main.c] ^^ enclave RIP=0x182d1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 237
+[main.c] ^^ enclave RIP=0x1a3c0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 238
+[main.c] ^^ enclave RIP=0x1a3c4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 239
+[main.c] ^^ enclave RIP=0x1a3c5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 240
+[main.c] ^^ enclave RIP=0x1a3c8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 241
+[main.c] ^^ enclave RIP=0x1a3ca
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 242
+[main.c] ^^ enclave RIP=0x1a3cc
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 243
+[main.c] ^^ enclave RIP=0x1a3ce
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 244
+[main.c] ^^ enclave RIP=0x1a3d1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 245
+[main.c] ^^ enclave RIP=0x1a3d3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 246
+[main.c] ^^ enclave RIP=0x1a3d4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 247
+[main.c] ^^ enclave RIP=0x1a3d8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 248
+[main.c] ^^ enclave RIP=0x1a3df
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 249
+[main.c] ^^ enclave RIP=0x1a3e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 250
+[main.c] ^^ enclave RIP=0x1a3e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 251
+[main.c] ^^ enclave RIP=0x1a3ec
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 252
+[main.c] ^^ enclave RIP=0x1a3ee
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 253
+[main.c] ^^ enclave RIP=0x1a3f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 254
+[main.c] ^^ enclave RIP=0x1a3fa
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 255
+[main.c] ^^ enclave RIP=0x1a402
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 256
+[main.c] ^^ enclave RIP=0x1a404
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 257
+[main.c] ^^ enclave RIP=0x1a407
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 258
+[main.c] ^^ enclave RIP=0x1a409
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 259
+[main.c] ^^ enclave RIP=0x1a40c
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 260
+[main.c] ^^ enclave RIP=0x1a411
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 261
+[main.c] ^^ enclave RIP=0x1a413
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 262
+[main.c] ^^ enclave RIP=0x1a419
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 263
+[main.c] ^^ enclave RIP=0x1a41c
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 264
+[main.c] ^^ enclave RIP=0x1a41f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 265
+[main.c] ^^ enclave RIP=0x1a423
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 266
+[main.c] ^^ enclave RIP=0x1a427
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 267
+[main.c] ^^ enclave RIP=0x1a42a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 268
+[main.c] ^^ enclave RIP=0x1a430
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 269
+[main.c] ^^ enclave RIP=0x1a434
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 270
+[main.c] ^^ enclave RIP=0x1a437
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 271
+[main.c] ^^ enclave RIP=0x1a439
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 272
+[main.c] ^^ enclave RIP=0x1a5b7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 273
+[main.c] ^^ enclave RIP=0x1a5b9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 274
+[main.c] ^^ enclave RIP=0x1a5be
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 275
+[main.c] ^^ enclave RIP=0x1a4e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 276
+[main.c] ^^ enclave RIP=0x1a4e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 277
+[main.c] ^^ enclave RIP=0x1a4e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 278
+[main.c] ^^ enclave RIP=0x1a4ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 279
+[main.c] ^^ enclave RIP=0x1a4ef
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 280
+[main.c] ^^ enclave RIP=0x1a4f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 281
+[main.c] ^^ enclave RIP=0x1a4e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 282
+[main.c] ^^ enclave RIP=0x1a4e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 283
+[main.c] ^^ enclave RIP=0x1a4e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 284
+[main.c] ^^ enclave RIP=0x1a4ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 285
+[main.c] ^^ enclave RIP=0x1a4ef
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 286
+[main.c] ^^ enclave RIP=0x1a4f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 287
+[main.c] ^^ enclave RIP=0x1a4e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 288
+[main.c] ^^ enclave RIP=0x1a4e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 289
+[main.c] ^^ enclave RIP=0x1a4e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 290
+[main.c] ^^ enclave RIP=0x1a4ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 291
+[main.c] ^^ enclave RIP=0x1a4ef
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 292
+[main.c] ^^ enclave RIP=0x1a4f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 293
+[main.c] ^^ enclave RIP=0x1a4e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 294
+[main.c] ^^ enclave RIP=0x1a4e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 295
+[main.c] ^^ enclave RIP=0x1a4e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 296
+[main.c] ^^ enclave RIP=0x1a4ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 297
+[main.c] ^^ enclave RIP=0x1a4ef
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 298
+[main.c] ^^ enclave RIP=0x1a4f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 299
+[main.c] ^^ enclave RIP=0x1a4e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 300
+[main.c] ^^ enclave RIP=0x1a4e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 301
+[main.c] ^^ enclave RIP=0x1a4e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 302
+[main.c] ^^ enclave RIP=0x1a4ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 303
+[main.c] ^^ enclave RIP=0x1a4ef
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 304
+[main.c] ^^ enclave RIP=0x1a4f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 305
+[main.c] ^^ enclave RIP=0x1a4e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 306
+[main.c] ^^ enclave RIP=0x1a4e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 307
+[main.c] ^^ enclave RIP=0x1a4e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 308
+[main.c] ^^ enclave RIP=0x1a4ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 309
+[main.c] ^^ enclave RIP=0x1a4ef
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 310
+[main.c] ^^ enclave RIP=0x1a4f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 311
+[main.c] ^^ enclave RIP=0x1a4e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 312
+[main.c] ^^ enclave RIP=0x1a4e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 313
+[main.c] ^^ enclave RIP=0x1a4e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 314
+[main.c] ^^ enclave RIP=0x1a4ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 315
+[main.c] ^^ enclave RIP=0x1a4ef
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 316
+[main.c] ^^ enclave RIP=0x1a4f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 317
+[main.c] ^^ enclave RIP=0x1a4e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 318
+[main.c] ^^ enclave RIP=0x1a4e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 319
+[main.c] ^^ enclave RIP=0x1a4e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 320
+[main.c] ^^ enclave RIP=0x1a4ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 321
+[main.c] ^^ enclave RIP=0x1a4ef
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 322
+[main.c] ^^ enclave RIP=0x1a4f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 323
+[main.c] ^^ enclave RIP=0x1a4e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 324
+[main.c] ^^ enclave RIP=0x1a4e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 325
+[main.c] ^^ enclave RIP=0x1a4e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 326
+[main.c] ^^ enclave RIP=0x1a4ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 327
+[main.c] ^^ enclave RIP=0x1a4ef
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 328
+[main.c] ^^ enclave RIP=0x1a4f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 329
+[main.c] ^^ enclave RIP=0x1a4e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 330
+[main.c] ^^ enclave RIP=0x1a4e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 331
+[main.c] ^^ enclave RIP=0x1a4e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 332
+[main.c] ^^ enclave RIP=0x1a4ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 333
+[main.c] ^^ enclave RIP=0x1a4ef
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 334
+[main.c] ^^ enclave RIP=0x1a4f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 335
+[main.c] ^^ enclave RIP=0x1a4e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 336
+[main.c] ^^ enclave RIP=0x1a4e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 337
+[main.c] ^^ enclave RIP=0x1a4e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 338
+[main.c] ^^ enclave RIP=0x1a4ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 339
+[main.c] ^^ enclave RIP=0x1a4ef
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 340
+[main.c] ^^ enclave RIP=0x1a4f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 341
+[main.c] ^^ enclave RIP=0x1a4e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 342
+[main.c] ^^ enclave RIP=0x1a4e3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 343
+[main.c] ^^ enclave RIP=0x1a4e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 344
+[main.c] ^^ enclave RIP=0x1a4ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 345
+[main.c] ^^ enclave RIP=0x1a4ef
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 346
+[main.c] ^^ enclave RIP=0x1a4f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 347
+[main.c] ^^ enclave RIP=0x1a4f3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 348
+[main.c] ^^ enclave RIP=0x1a4f6
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 349
+[main.c] ^^ enclave RIP=0x1a4fa
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 350
+[main.c] ^^ enclave RIP=0x1a4fc
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 351
+[main.c] ^^ enclave RIP=0x1a4ff
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 352
+[main.c] ^^ enclave RIP=0x1a501
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 353
+[main.c] ^^ enclave RIP=0x1a506
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 354
+[main.c] ^^ enclave RIP=0x1a509
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 355
+[main.c] ^^ enclave RIP=0x1a50b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 356
+[main.c] ^^ enclave RIP=0x1a50d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 357
+[main.c] ^^ enclave RIP=0x1a510
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 358
+[main.c] ^^ enclave RIP=0x1a513
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 359
+[main.c] ^^ enclave RIP=0x1a519
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 360
+[main.c] ^^ enclave RIP=0x1a51b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 361
+[main.c] ^^ enclave RIP=0x1a51e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 362
+[main.c] ^^ enclave RIP=0x1a522
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 363
+[main.c] ^^ enclave RIP=0x1a526
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 364
+[main.c] ^^ enclave RIP=0x1a529
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 365
+[main.c] ^^ enclave RIP=0x1a52d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 366
+[main.c] ^^ enclave RIP=0x1a538
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 367
+[main.c] ^^ enclave RIP=0x1a540
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 368
+[main.c] ^^ enclave RIP=0x1a546
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 369
+[main.c] ^^ enclave RIP=0x1a54a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 370
+[main.c] ^^ enclave RIP=0x1a54d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 371
+[main.c] ^^ enclave RIP=0x1a54f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 372
+[main.c] ^^ enclave RIP=0x1a551
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 373
+[main.c] ^^ enclave RIP=0x1a554
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 374
+[main.c] ^^ enclave RIP=0x1a556
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 375
+[main.c] ^^ enclave RIP=0x1a558
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 376
+[main.c] ^^ enclave RIP=0x1a560
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 377
+[main.c] ^^ enclave RIP=0x1a563
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 378
+[main.c] ^^ enclave RIP=0x1a565
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 379
+[main.c] ^^ enclave RIP=0x1a56d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 380
+[main.c] ^^ enclave RIP=0x1a56f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 381
+[main.c] ^^ enclave RIP=0x1a560
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 382
+[main.c] ^^ enclave RIP=0x1a563
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 383
+[main.c] ^^ enclave RIP=0x1a565
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 384
+[main.c] ^^ enclave RIP=0x1a56d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 385
+[main.c] ^^ enclave RIP=0x1a56f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 386
+[main.c] ^^ enclave RIP=0x1a560
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 387
+[main.c] ^^ enclave RIP=0x1a563
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 388
+[main.c] ^^ enclave RIP=0x1a565
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 389
+[main.c] ^^ enclave RIP=0x1a56d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 390
+[main.c] ^^ enclave RIP=0x1a56f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 391
+[main.c] ^^ enclave RIP=0x1a560
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 392
+[main.c] ^^ enclave RIP=0x1a563
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 393
+[main.c] ^^ enclave RIP=0x1a565
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 394
+[main.c] ^^ enclave RIP=0x1a56d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 395
+[main.c] ^^ enclave RIP=0x1a56f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 396
+[main.c] ^^ enclave RIP=0x1a560
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 397
+[main.c] ^^ enclave RIP=0x1a563
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 398
+[main.c] ^^ enclave RIP=0x1a565
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 399
+[main.c] ^^ enclave RIP=0x1a56d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 400
+[main.c] ^^ enclave RIP=0x1a56f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 401
+[main.c] ^^ enclave RIP=0x1a560
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 402
+[main.c] ^^ enclave RIP=0x1a563
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 403
+[main.c] ^^ enclave RIP=0x1a565
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 404
+[main.c] ^^ enclave RIP=0x1a56d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 405
+[main.c] ^^ enclave RIP=0x1a56f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 406
+[main.c] ^^ enclave RIP=0x1a560
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 407
+[main.c] ^^ enclave RIP=0x1a563
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 408
+[main.c] ^^ enclave RIP=0x1a565
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 409
+[main.c] ^^ enclave RIP=0x1a56d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 410
+[main.c] ^^ enclave RIP=0x1a56f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 411
+[main.c] ^^ enclave RIP=0x1a560
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 412
+[main.c] ^^ enclave RIP=0x1a563
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 413
+[main.c] ^^ enclave RIP=0x1a565
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 414
+[main.c] ^^ enclave RIP=0x1a56d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 415
+[main.c] ^^ enclave RIP=0x1a56f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 416
+[main.c] ^^ enclave RIP=0x1a560
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 417
+[main.c] ^^ enclave RIP=0x1a563
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 418
+[main.c] ^^ enclave RIP=0x1a565
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 419
+[main.c] ^^ enclave RIP=0x1a56d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 420
+[main.c] ^^ enclave RIP=0x1a56f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 421
+[main.c] ^^ enclave RIP=0x1a560
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 422
+[main.c] ^^ enclave RIP=0x1a563
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 423
+[main.c] ^^ enclave RIP=0x1a565
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 424
+[main.c] ^^ enclave RIP=0x1a56d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 425
+[main.c] ^^ enclave RIP=0x1a56f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 426
+[main.c] ^^ enclave RIP=0x1a560
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 427
+[main.c] ^^ enclave RIP=0x1a563
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 428
+[main.c] ^^ enclave RIP=0x1a565
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 429
+[main.c] ^^ enclave RIP=0x1a56d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 430
+[main.c] ^^ enclave RIP=0x1a56f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 431
+[main.c] ^^ enclave RIP=0x1a571
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 432
+[main.c] ^^ enclave RIP=0x1a574
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 433
+[main.c] ^^ enclave RIP=0x1a577
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 434
+[main.c] ^^ enclave RIP=0x1a57a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 435
+[main.c] ^^ enclave RIP=0x1a57d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 436
+[main.c] ^^ enclave RIP=0x1a580
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 437
+[main.c] ^^ enclave RIP=0x1a583
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 438
+[main.c] ^^ enclave RIP=0x183c0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 439
+[main.c] ^^ enclave RIP=0x183c4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 440
+[main.c] ^^ enclave RIP=0x183cb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 441
+[main.c] ^^ enclave RIP=0x183cd
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 442
+[main.c] ^^ enclave RIP=0x183d0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 443
+[main.c] ^^ enclave RIP=0x183d8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 444
+[main.c] ^^ enclave RIP=0x183db
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 445
+[main.c] ^^ enclave RIP=0x183df
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 446
+[main.c] ^^ enclave RIP=0x183e2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 447
+[main.c] ^^ enclave RIP=0x183e5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 448
+[main.c] ^^ enclave RIP=0x183e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 449
+[main.c] ^^ enclave RIP=0x183ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 450
+[main.c] ^^ enclave RIP=0x183ee
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 451
+[main.c] ^^ enclave RIP=0x183f4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 452
+[main.c] ^^ enclave RIP=0x183f9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 453
+[main.c] ^^ enclave RIP=0x183fb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 454
+[main.c] ^^ enclave RIP=0x18401
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 455
+[main.c] ^^ enclave RIP=0x18407
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 456
+[main.c] ^^ enclave RIP=0x1840d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 457
+[main.c] ^^ enclave RIP=0x18413
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 458
+[main.c] ^^ enclave RIP=0x18417
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 459
+[main.c] ^^ enclave RIP=0x18419
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 460
+[main.c] ^^ enclave RIP=0x1841c
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 461
+[main.c] ^^ enclave RIP=0x1841f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 462
+[main.c] ^^ enclave RIP=0x1a587
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 463
+[main.c] ^^ enclave RIP=0x1a58c
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 464
+[main.c] ^^ enclave RIP=0x1a58e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 465
+[main.c] ^^ enclave RIP=0x1a591
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 466
+[main.c] ^^ enclave RIP=0x18420
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 467
+[main.c] ^^ enclave RIP=0x18424
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 468
+[main.c] ^^ enclave RIP=0x1842b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 469
+[main.c] ^^ enclave RIP=0x19b00
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 470
+[main.c] ^^ enclave RIP=0x19b04
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 471
+[main.c] ^^ enclave RIP=0x19b08
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 472
+[main.c] ^^ enclave RIP=0x19b0b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 473
+[main.c] ^^ enclave RIP=0x19b0e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 474
+[main.c] ^^ enclave RIP=0x19b14
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 475
+[main.c] ^^ enclave RIP=0x19b18
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 476
+[main.c] ^^ enclave RIP=0x19b1d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 477
+[main.c] ^^ enclave RIP=0x19b22
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 478
+[main.c] ^^ enclave RIP=0x19b27
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 479
+[main.c] ^^ enclave RIP=0x19b2b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 480
+[main.c] ^^ enclave RIP=0x19b31
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 481
+[main.c] ^^ enclave RIP=0x19b37
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 482
+[main.c] ^^ enclave RIP=0x19b40
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 483
+[main.c] ^^ enclave RIP=0x19b45
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 484
+[main.c] ^^ enclave RIP=0x19b4a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 485
+[main.c] ^^ enclave RIP=0x19b4e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 486
+[main.c] ^^ enclave RIP=0x19b54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 487
+[main.c] ^^ enclave RIP=0x19b58
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 488
+[main.c] ^^ enclave RIP=0x19b5c
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 489
+[main.c] ^^ enclave RIP=0x19b60
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 490
+[main.c] ^^ enclave RIP=0x19b65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 491
+[main.c] ^^ enclave RIP=0x19b69
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 492
+[main.c] ^^ enclave RIP=0x19b6e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 493
+[main.c] ^^ enclave RIP=0x19b74
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 494
+[main.c] ^^ enclave RIP=0x19b78
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 495
+[main.c] ^^ enclave RIP=0x19b7d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 496
+[main.c] ^^ enclave RIP=0x19b81
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 497
+[main.c] ^^ enclave RIP=0x19b86
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 498
+[main.c] ^^ enclave RIP=0x19b8a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 499
+[main.c] ^^ enclave RIP=0x19b8e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 500
+[main.c] ^^ enclave RIP=0x19b93
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 501
+[main.c] ^^ enclave RIP=0x19b99
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 502
+[main.c] ^^ enclave RIP=0x19b9d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 503
+[main.c] ^^ enclave RIP=0x19ba2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 504
+[main.c] ^^ enclave RIP=0x19ba6
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 505
+[main.c] ^^ enclave RIP=0x19bab
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 506
+[main.c] ^^ enclave RIP=0x19baf
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 507
+[main.c] ^^ enclave RIP=0x19bb3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 508
+[main.c] ^^ enclave RIP=0x19bb8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 509
+[main.c] ^^ enclave RIP=0x19bbe
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 510
+[main.c] ^^ enclave RIP=0x19bc2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 511
+[main.c] ^^ enclave RIP=0x19bc7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 512
+[main.c] ^^ enclave RIP=0x19bcb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 513
+[main.c] ^^ enclave RIP=0x19bcf
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 514
+[main.c] ^^ enclave RIP=0x19bd5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 515
+[main.c] ^^ enclave RIP=0x19bd9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 516
+[main.c] ^^ enclave RIP=0x19bdd
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 517
+[main.c] ^^ enclave RIP=0x19be2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 518
+[main.c] ^^ enclave RIP=0x19be6
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 519
+[main.c] ^^ enclave RIP=0x19bea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 520
+[main.c] ^^ enclave RIP=0x19bee
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 521
+[main.c] ^^ enclave RIP=0x19bf3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 522
+[main.c] ^^ enclave RIP=0x19bf7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 523
+[main.c] ^^ enclave RIP=0x19bfb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 524
+[main.c] ^^ enclave RIP=0x19c01
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 525
+[main.c] ^^ enclave RIP=0x19c05
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 526
+[main.c] ^^ enclave RIP=0x19c09
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 527
+[main.c] ^^ enclave RIP=0x19c0e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 528
+[main.c] ^^ enclave RIP=0x19c12
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 529
+[main.c] ^^ enclave RIP=0x19c16
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 530
+[main.c] ^^ enclave RIP=0x19c1a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 531
+[main.c] ^^ enclave RIP=0x19c1f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 532
+[main.c] ^^ enclave RIP=0x19c23
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 533
+[main.c] ^^ enclave RIP=0x19c27
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 534
+[main.c] ^^ enclave RIP=0x19c2d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 535
+[main.c] ^^ enclave RIP=0x19c31
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 536
+[main.c] ^^ enclave RIP=0x19c35
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 537
+[main.c] ^^ enclave RIP=0x19c3a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 538
+[main.c] ^^ enclave RIP=0x19c3e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 539
+[main.c] ^^ enclave RIP=0x19c42
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 540
+[main.c] ^^ enclave RIP=0x19c46
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 541
+[main.c] ^^ enclave RIP=0x19c4b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 542
+[main.c] ^^ enclave RIP=0x19c4f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 543
+[main.c] ^^ enclave RIP=0x19c53
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 544
+[main.c] ^^ enclave RIP=0x19c59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 545
+[main.c] ^^ enclave RIP=0x19c5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 546
+[main.c] ^^ enclave RIP=0x19c61
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 547
+[main.c] ^^ enclave RIP=0x19c66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 548
+[main.c] ^^ enclave RIP=0x19c6a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 549
+[main.c] ^^ enclave RIP=0x19c6e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 550
+[main.c] ^^ enclave RIP=0x19c72
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 551
+[main.c] ^^ enclave RIP=0x19c77
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 552
+[main.c] ^^ enclave RIP=0x19c7b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 553
+[main.c] ^^ enclave RIP=0x19c7f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 554
+[main.c] ^^ enclave RIP=0x19c85
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 555
+[main.c] ^^ enclave RIP=0x19c89
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 556
+[main.c] ^^ enclave RIP=0x19c8d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 557
+[main.c] ^^ enclave RIP=0x19c92
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 558
+[main.c] ^^ enclave RIP=0x19c96
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 559
+[main.c] ^^ enclave RIP=0x19c9a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 560
+[main.c] ^^ enclave RIP=0x19c9e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 561
+[main.c] ^^ enclave RIP=0x19ca6
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 562
+[main.c] ^^ enclave RIP=0x19caa
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 563
+[main.c] ^^ enclave RIP=0x19cae
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 564
+[main.c] ^^ enclave RIP=0x19cb4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 565
+[main.c] ^^ enclave RIP=0x19cb8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 566
+[main.c] ^^ enclave RIP=0x19cbc
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 567
+[main.c] ^^ enclave RIP=0x19cc1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 568
+[main.c] ^^ enclave RIP=0x19cc5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 569
+[main.c] ^^ enclave RIP=0x19cc9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 570
+[main.c] ^^ enclave RIP=0x19ccd
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 571
+[main.c] ^^ enclave RIP=0x19cd5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 572
+[main.c] ^^ enclave RIP=0x19cd9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 573
+[main.c] ^^ enclave RIP=0x19cdd
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 574
+[main.c] ^^ enclave RIP=0x19ce3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 575
+[main.c] ^^ enclave RIP=0x19ce7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 576
+[main.c] ^^ enclave RIP=0x19ceb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 577
+[main.c] ^^ enclave RIP=0x19cf0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 578
+[main.c] ^^ enclave RIP=0x19cf4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 579
+[main.c] ^^ enclave RIP=0x19cf8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 580
+[main.c] ^^ enclave RIP=0x19cfc
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 581
+[main.c] ^^ enclave RIP=0x19d04
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 582
+[main.c] ^^ enclave RIP=0x19d08
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 583
+[main.c] ^^ enclave RIP=0x19d0c
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 584
+[main.c] ^^ enclave RIP=0x19d12
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 585
+[main.c] ^^ enclave RIP=0x19d16
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 586
+[main.c] ^^ enclave RIP=0x19d1a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 587
+[main.c] ^^ enclave RIP=0x19d1f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 588
+[main.c] ^^ enclave RIP=0x19d23
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 589
+[main.c] ^^ enclave RIP=0x19d27
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 590
+[main.c] ^^ enclave RIP=0x19d2b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 591
+[main.c] ^^ enclave RIP=0x19d33
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 592
+[main.c] ^^ enclave RIP=0x19d37
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 593
+[main.c] ^^ enclave RIP=0x19d3b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 594
+[main.c] ^^ enclave RIP=0x19d41
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 595
+[main.c] ^^ enclave RIP=0x19d45
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 596
+[main.c] ^^ enclave RIP=0x19d49
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 597
+[main.c] ^^ enclave RIP=0x19d4e
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 598
+[main.c] ^^ enclave RIP=0x19d52
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 599
+[main.c] ^^ enclave RIP=0x19d56
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 600
+[main.c] ^^ enclave RIP=0x19d5a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 601
+[main.c] ^^ enclave RIP=0x19d62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 602
+[main.c] ^^ enclave RIP=0x19d66
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 603
+[main.c] ^^ enclave RIP=0x19d6a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 604
+[main.c] ^^ enclave RIP=0x19d70
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 605
+[main.c] ^^ enclave RIP=0x19d74
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 606
+[main.c] ^^ enclave RIP=0x19d78
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 607
+[main.c] ^^ enclave RIP=0x19d7d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 608
+[main.c] ^^ enclave RIP=0x19d81
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 609
+[main.c] ^^ enclave RIP=0x19d85
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 610
+[main.c] ^^ enclave RIP=0x19d89
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 611
+[main.c] ^^ enclave RIP=0x19d91
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 612
+[main.c] ^^ enclave RIP=0x19d95
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 613
+[main.c] ^^ enclave RIP=0x19d99
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 614
+[main.c] ^^ enclave RIP=0x19d9f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 615
+[main.c] ^^ enclave RIP=0x19da3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 616
+[main.c] ^^ enclave RIP=0x19da7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 617
+[main.c] ^^ enclave RIP=0x19dac
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 618
+[main.c] ^^ enclave RIP=0x19db0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 619
+[main.c] ^^ enclave RIP=0x19db4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 620
+[main.c] ^^ enclave RIP=0x19dbc
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 621
+[main.c] ^^ enclave RIP=0x19dc0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 622
+[main.c] ^^ enclave RIP=0x19dc4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 623
+[main.c] ^^ enclave RIP=0x19dca
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 624
+[main.c] ^^ enclave RIP=0x19dce
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 625
+[main.c] ^^ enclave RIP=0x19dd2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 626
+[main.c] ^^ enclave RIP=0x19dd7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 627
+[main.c] ^^ enclave RIP=0x19ddb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 628
+[main.c] ^^ enclave RIP=0x19ddf
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 629
+[main.c] ^^ enclave RIP=0x19de7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 630
+[main.c] ^^ enclave RIP=0x19deb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 631
+[main.c] ^^ enclave RIP=0x19df0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 632
+[main.c] ^^ enclave RIP=0x19df4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 633
+[main.c] ^^ enclave RIP=0x19df9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 634
+[main.c] ^^ enclave RIP=0x19dfe
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 635
+[main.c] ^^ enclave RIP=0x19e02
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 636
+[main.c] ^^ enclave RIP=0x19e06
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 637
+[main.c] ^^ enclave RIP=0x19e0c
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 638
+[main.c] ^^ enclave RIP=0x19e11
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 639
+[main.c] ^^ enclave RIP=0x19e16
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 640
+[main.c] ^^ enclave RIP=0x19e1a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 641
+[main.c] ^^ enclave RIP=0x19e20
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 642
+[main.c] ^^ enclave RIP=0x19e26
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 643
+[main.c] ^^ enclave RIP=0x19e2a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 644
+[main.c] ^^ enclave RIP=0x19e2f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 645
+[main.c] ^^ enclave RIP=0x19e33
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 646
+[main.c] ^^ enclave RIP=0x19e36
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 647
+[main.c] ^^ enclave RIP=0x1a595
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 648
+[main.c] ^^ enclave RIP=0x1a59d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 649
+[main.c] ^^ enclave RIP=0x1a5a6
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 650
+[main.c] ^^ enclave RIP=0x1a5a8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 651
+[main.c] ^^ enclave RIP=0x1a5ac
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 652
+[main.c] ^^ enclave RIP=0x1a5ad
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 653
+[main.c] ^^ enclave RIP=0x1a5af
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 654
+[main.c] ^^ enclave RIP=0x1a5b1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 655
+[main.c] ^^ enclave RIP=0x1a5b3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 656
+[main.c] ^^ enclave RIP=0x1a5b5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 657
+[main.c] ^^ enclave RIP=0x1a5b6
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 658
+[main.c] ^^ enclave RIP=0x182d6
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 659
+[main.c] ^^ enclave RIP=0x182d9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 660
+[main.c] ^^ enclave RIP=0x182dc
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 661
+[main.c] ^^ enclave RIP=0x18360
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 662
+[main.c] ^^ enclave RIP=0x18364
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 663
+[main.c] ^^ enclave RIP=0x18368
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 664
+[main.c] ^^ enclave RIP=0x1836a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 665
+[main.c] ^^ enclave RIP=0x1836f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 666
+[main.c] ^^ enclave RIP=0x18372
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 667
+[main.c] ^^ enclave RIP=0x18377
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 668
+[main.c] ^^ enclave RIP=0x1837a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 669
+[main.c] ^^ enclave RIP=0x1837f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 670
+[main.c] ^^ enclave RIP=0x18382
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 671
+[main.c] ^^ enclave RIP=0x18387
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 672
+[main.c] ^^ enclave RIP=0x1838a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 673
+[main.c] ^^ enclave RIP=0x1838f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 674
+[main.c] ^^ enclave RIP=0x18392
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 675
+[main.c] ^^ enclave RIP=0x18397
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 676
+[main.c] ^^ enclave RIP=0x1839a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 677
+[main.c] ^^ enclave RIP=0x1839f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 678
+[main.c] ^^ enclave RIP=0x183a2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 679
+[main.c] ^^ enclave RIP=0x182e0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 680
+[main.c] ^^ enclave RIP=0x182e2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 681
+[main.c] ^^ enclave RIP=0x182e6
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 682
+[main.c] ^^ enclave RIP=0x182e7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 683
+[main.c] ^^ enclave RIP=0x182e8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 684
+[main.c] ^^ enclave RIP=0x182ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 685
+[main.c] ^^ enclave RIP=0x182ec
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 686
+[main.c] ^^ enclave RIP=0x182ee
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 687
+[main.c] ^^ enclave RIP=0x182f0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 688
+[main.c] ^^ enclave RIP=0x127e1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 689
+[main.c] ^^ enclave RIP=0x127e4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 690
+[main.c] ^^ enclave RIP=0x127e6
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 691
+[main.c] ^^ enclave RIP=0x127e9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 692
+[main.c] ^^ enclave RIP=0x12808
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 693
+[main.c] ^^ enclave RIP=0x1280a
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 694
+[main.c] ^^ enclave RIP=0x1280b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 695
+[main.c] ^^ enclave RIP=0x1280c
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 696
+[main.c] ^^ enclave RIP=0x1280f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 697
+[main.c] ^^ enclave RIP=0x12811
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 698
+[main.c] ^^ enclave RIP=0x12814
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 699
+[main.c] ^^ enclave RIP=0x30c9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 700
+[main.c] ^^ enclave RIP=0x30ce
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 701
+[main.c] ^^ enclave RIP=0x30d5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 702
+[main.c] ^^ enclave RIP=0x30d8
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 703
+[main.c] ^^ enclave RIP=0x11a40
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 704
+[main.c] ^^ enclave RIP=0x11a44
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 705
+[main.c] ^^ enclave RIP=0x11a46
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 706
+[main.c] ^^ enclave RIP=0x11a49
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 707
+[main.c] ^^ enclave RIP=0x11a4b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 708
+[main.c] ^^ enclave RIP=0x11a4d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 709
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 710
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 711
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 712
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 713
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 714
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 715
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 716
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 717
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 718
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 719
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 720
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 721
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 722
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 723
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 724
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 725
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 726
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 727
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 728
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 729
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 730
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 731
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 732
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 733
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 734
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 735
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 736
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 737
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 738
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 739
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 740
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 741
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 742
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 743
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 744
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 745
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 746
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 747
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 748
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 749
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 750
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 751
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 752
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 753
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 754
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 755
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 756
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 757
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 758
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 759
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 760
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 761
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 762
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 763
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 764
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 765
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 766
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 767
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 768
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 769
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 770
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 771
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 772
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 773
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 774
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 775
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 776
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 777
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 778
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 779
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 780
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 781
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 782
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 783
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 784
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 785
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 786
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 787
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 788
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 789
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 790
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 791
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 792
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 793
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 794
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 795
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 796
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 797
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 798
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 799
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 800
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 801
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 802
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 803
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 804
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 805
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 806
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 807
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 808
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 809
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 810
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 811
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 812
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 813
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 814
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 815
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 816
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 817
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 818
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 819
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 820
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 821
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 822
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 823
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 824
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 825
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 826
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 827
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 828
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 829
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 830
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 831
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 832
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 833
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 834
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 835
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 836
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 837
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 838
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 839
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 840
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 841
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 842
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 843
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 844
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 845
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 846
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 847
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 848
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 849
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 850
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 851
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 852
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 853
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 854
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 855
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 856
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 857
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 858
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 859
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 860
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 861
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 862
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 863
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 864
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 865
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 866
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 867
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 868
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 869
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 870
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 871
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 872
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 873
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 874
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 875
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 876
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 877
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 878
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 879
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 880
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 881
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 882
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 883
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 884
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 885
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 886
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 887
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 888
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 889
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 890
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 891
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 892
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 893
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 894
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 895
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 896
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 897
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 898
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 899
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 900
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 901
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 902
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 903
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 904
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 905
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 906
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 907
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 908
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 909
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 910
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 911
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 912
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 913
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 914
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 915
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 916
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 917
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 918
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 919
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 920
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 921
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 922
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 923
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 924
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 925
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 926
+[main.c] ^^ enclave RIP=0x11a59
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 927
+[main.c] ^^ enclave RIP=0x11a5d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 928
+[main.c] ^^ enclave RIP=0x11a62
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 929
+[main.c] ^^ enclave RIP=0x11a65
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 930
+[main.c] ^^ enclave RIP=0x11a50
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 931
+[main.c] ^^ enclave RIP=0x11a54
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 932
+[main.c] ^^ enclave RIP=0x11a57
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 933
+[main.c] ^^ enclave RIP=0x11a70
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 934
+[main.c] ^^ enclave RIP=0x11a72
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 935
+[main.c] ^^ enclave RIP=0x30dd
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 936
+[main.c] ^^ enclave RIP=0x30df
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 937
+[main.c] ^^ enclave RIP=0x30e2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 938
+[main.c] ^^ enclave RIP=0x30e7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 939
+[main.c] ^^ enclave RIP=0x30f0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 940
+[main.c] ^^ enclave RIP=0x30f7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 941
+[main.c] ^^ enclave RIP=0x30fb
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 942
+[main.c] ^^ enclave RIP=0x30fe
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 943
+[main.c] ^^ enclave RIP=0x30ff
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 944
+[main.c] ^^ enclave RIP=0x3305
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 945
+[main.c] ^^ enclave RIP=0x330b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 946
+[main.c] ^^ enclave RIP=0x330d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 947
+[main.c] ^^ enclave RIP=0x3314
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 948
+[main.c] ^^ enclave RIP=0x331b
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 949
+[main.c] ^^ enclave RIP=0x331d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 950
+[main.c] ^^ enclave RIP=0x3320
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 951
+[main.c] ^^ enclave RIP=0x3327
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 952
+[main.c] ^^ enclave RIP=0x3367
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 953
+[main.c] ^^ enclave RIP=0x336d
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 954
+[main.c] ^^ enclave RIP=0x336f
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 955
+[main.c] ^^ enclave RIP=0x3371
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 956
+[main.c] ^^ enclave RIP=0x3378
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 957
+[main.c] ^^ enclave RIP=0x337c
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 958
+[main.c] ^^ enclave RIP=0x71b0
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 959
+[main.c] ^^ enclave RIP=0x71b4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 960
+[main.c] ^^ enclave RIP=0x71b7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 961
+[main.c] ^^ enclave RIP=0x71b9
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 962
+[main.c] ^^ enclave RIP=0x71bd
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 963
+[main.c] ^^ enclave RIP=0x71c2
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 964
+[main.c] ^^ enclave RIP=0x71c5
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 965
+[main.c] ^^ enclave RIP=0x71d3
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 966
+[main.c] ^^ enclave RIP=0x71da
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 967
+[main.c] ^^ enclave RIP=0x71dd
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 968
+[main.c] ^^ enclave RIP=0x71e4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 969
+[main.c] ^^ enclave RIP=0x71e7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 970
+[main.c] ^^ enclave RIP=0x71ea
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 971
+[main.c] ^^ enclave RIP=0x71ed
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 972
+[main.c] ^^ enclave RIP=0x71f1
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 973
+[main.c] ^^ enclave RIP=0x71f4
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 974
+[main.c] ^^ enclave RIP=0x71f7
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 975
+[main.c] ^^ enclave RIP=0x71fa
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 976
+[main.c] ^^ enclave RIP=0x71fd
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 977
+[main.c] ^^ enclave RIP=0x71ff
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 978
+[main.c] ^^ enclave RIP=0x7202
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 979
+[main.c] ^^ enclave RIP=0x3381
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 980
+[main.c] ^^ enclave RIP=0x3383
+[main.c] pf handler
+[main.c] Caught single-step trap (RIP=0x561fe6684065)
+
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 981
+[main.c] ^^ enclave RIP=0x3330
+[main.c] testreach
+attacker thread running
+[main.c] encl base address: '0x7f7669400000'
+access rights revoked on sha
+[main.c] aep
+Thread 140146540275392 is executing
+stepcnt 982
+[main.c] ^^ enclave RIP=0x1b38c
+[main.c] aep
+Thread 140146540275392 is executing
+stepcnt 983
+[main.c] ^^ enclave RIP=0x1b3ac
+[main.c] pf handler
+faultcnt 2
+[main.c] Caught page fault (base address=0x7f7669412000)
+access rights restored on sha
+access rights revoked on trigger_adrs
+[main.c] aep
+Thread 140146540275392 is executing
+stepcnt 984
+[main.c] ^^ enclave RIP=0x126d0
+[main.c] pf handler
+faultcnt 3
+[main.c] Caught page fault (base address=0x7f7669403000)
+access rights restored on trigger_adrs
+access rights revoked on sha
+[main.c] aep
+Thread 140146540275392 is executing
+stepcnt 985
+[main.c] ^^ enclave RIP=0x32c5
+[main.c] pf handler
+faultcnt 4
+[main.c] Caught page fault (base address=0x7f7669412000)
+access rights restored on sha
+access rights revoked on trigger_adrs
+[main.c] aep
+Thread 140146540275392 is executing
+stepcnt 986
+[main.c] ^^ enclave RIP=0x12040
+[main.c] pf handler
+faultcnt 5
+[main.c] Caught page fault (base address=0x7f7669403000)
+access rights restored on trigger_adrs
+access rights revoked on sha
+[main.c] aep
+Thread 140146540275392 is executing
+stepcnt 987
+[main.c] ^^ enclave RIP=0x308f
+[main.c] pf handler
+faultcnt 6
+[main.c] Caught page fault (base address=0x7f7669412000)
+access rights restored on sha
+access rights revoked on trigger_adrs
+[main.c] aep
+Thread 140146540275392 is executing
+stepcnt 988
+[main.c] ^^ enclave RIP=0x127b0
+[main.c] pf handler
+faultcnt 7
+[main.c] Caught page fault (base address=0x7f7669403000)
+access rights restored on trigger_adrs
+access rights revoked on sha
+[main.c] aep
+Thread 140146540275392 is executing
+stepcnt 989
+[main.c] ^^ enclave RIP=0x30c9
+[main.c] testreach2
+[main.c] enclave trigger at 0x7f7669403000; code at 0x7f76694033e7
+[main.c] pf handler
+faultcnt 9
+[main.c] Caught page fault (base address=0x7f7669403000)
+access rights restored on trigger_adrs
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 990
+[main.c] ^^ enclave RIP=0x30c9
+[main.c] pf handler
+faultcnt 10
+[main.c] Caught page fault (base address=0x7f7669412000)
+access rights restored on sha
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 991
+[main.c] ^^ enclave RIP=0x30c9
+[main.c] ocall_print_address: enclave says: 's.pw' '0x7f7669425340'
+[main.c] ocall_print_address: enclave says: 's.pw' '0x561fe6689080'
+[main.c] ocall_print_address: enclave says: 's.pw' '0x561fe66890c0'
+[main.c] aep
+Thread 140146548668096 is executing
+stepcnt 992
+[main.c] ^^ enclave RIP=0x10510

