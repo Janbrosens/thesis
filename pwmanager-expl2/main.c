@@ -237,18 +237,13 @@ void* victim_thread(void* arg) {
   
 
 
-    ecall_add_password(eidarg, "super_secret", "LiefjePiefje");
-    //ecall_set_debug(eidarg, "password1");
-    ecall_get_passwords2(eidarg, "dummy", &output);
-    for (int i = 0; i < output.array_len; ++i) {
-        printf("Password %d: %s\n", i, output.passwords[i]);
-    }
-
+    ecall_add_password(eidarg, "super_secret", "StellaTheDog");
+    
 }
 
 // Function for thread B
 
-void* attacker_thread(void* arg) {
+void* victim_thread2(void* arg) {
     // locking for turn, sync logic, thread B sleeps until thread A does amount of page fault
     pthread_mutex_lock(&lock);
     while (turn != 1) { // Wait until it's thread_B's turn
@@ -256,7 +251,7 @@ void* attacker_thread(void* arg) {
     }
     pthread_mutex_unlock(&lock);
 
-    printf("attacker thread running\n");
+    printf("victim thread 2 running\n");
 
     sgx_enclave_id_t eidarg = *(sgx_enclave_id_t*)arg;
     ecall_add_password(eidarg, "super_secret", "FlappyTheRabbit");
@@ -282,19 +277,18 @@ int main( int argc, char **argv )
     //Create Enclave
     sgx_enclave_id_t eid = create_enclave();
     int rv = 1, secret = 1;
-
-   
-
-
-
-  
-
     // Create 2 threads
     pthread_t t1, t2;
     pthread_create(&t1, NULL, victim_thread, (void*)&eid);
-    pthread_create(&t2, NULL, attacker_thread, (void*)&eid);
+    pthread_create(&t2, NULL, victim_thread2, (void*)&eid); 
 
     pthread_join(t1, NULL);
+
+    ecall_get_passwords(eid, "dummy", &output);
+    for (int i = 0; i < output.array_len; ++i) {
+        printf("Password %d: %s\n", i, output.passwords[i]);
+    }
+
     //pthread_join(t2, NULL);
 
 

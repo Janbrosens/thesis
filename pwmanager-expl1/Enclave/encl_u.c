@@ -15,10 +15,11 @@ typedef struct ms_ecall_change_master_password_t {
 	size_t ms_new_masterpw_len;
 } ms_ecall_change_master_password_t;
 
-typedef struct ms_ecall_get_passwords2_t {
+typedef struct ms_ecall_get_passwords_t {
 	const char* ms_masterpw;
+	size_t ms_masterpw_len;
 	void* ms_output;
-} ms_ecall_get_passwords2_t;
+} ms_ecall_get_passwords_t;
 
 typedef struct ms_ecall_init_master_password_t {
 	const char* ms_masterpw;
@@ -34,6 +35,11 @@ typedef struct ms_ocall_print_t {
 	const char* ms_pw;
 } ms_ocall_print_t;
 
+typedef struct ms_ocall_print_address_t {
+	const char* ms_str;
+	uint64_t ms_a;
+} ms_ocall_print_address_t;
+
 static sgx_status_t SGX_CDECL encl_ocall_print(void* pms)
 {
 	ms_ocall_print_t* ms = SGX_CAST(ms_ocall_print_t*, pms);
@@ -42,13 +48,22 @@ static sgx_status_t SGX_CDECL encl_ocall_print(void* pms)
 	return SGX_SUCCESS;
 }
 
+static sgx_status_t SGX_CDECL encl_ocall_print_address(void* pms)
+{
+	ms_ocall_print_address_t* ms = SGX_CAST(ms_ocall_print_address_t*, pms);
+	ocall_print_address(ms->ms_str, ms->ms_a);
+
+	return SGX_SUCCESS;
+}
+
 static const struct {
 	size_t nr_ocall;
-	void * table[1];
+	void * table[2];
 } ocall_table_encl = {
-	1,
+	2,
 	{
 		(void*)encl_ocall_print,
+		(void*)encl_ocall_print_address,
 	}
 };
 sgx_status_t ecall_setup(sgx_enclave_id_t eid)
@@ -82,11 +97,12 @@ sgx_status_t ecall_change_master_password(sgx_enclave_id_t eid, const char* old_
 	return status;
 }
 
-sgx_status_t ecall_get_passwords2(sgx_enclave_id_t eid, const char* masterpw, void* output)
+sgx_status_t ecall_get_passwords(sgx_enclave_id_t eid, const char* masterpw, void* output)
 {
 	sgx_status_t status;
-	ms_ecall_get_passwords2_t ms;
+	ms_ecall_get_passwords_t ms;
 	ms.ms_masterpw = masterpw;
+	ms.ms_masterpw_len = masterpw ? strlen(masterpw) + 1 : 0;
 	ms.ms_output = output;
 	status = sgx_ecall(eid, 3, &ocall_table_encl, &ms);
 	return status;

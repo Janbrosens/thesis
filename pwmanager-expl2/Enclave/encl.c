@@ -32,7 +32,6 @@ void hash_password(const char *pw, sgx_sha256_hash_t *out_hash) {
 int verify_master_password(const char *provided_pw) {
     sgx_sha256_hash_t provided_hash;
     hash_password(provided_pw, &provided_hash);
-
     return (memcmp(&provided_hash, &current_masterpw_hash, sizeof(sgx_sha256_hash_t)) == 0);
 }
 
@@ -60,7 +59,7 @@ void ecall_setup() {
     ecall_add_password(initial_masterpw, "SammyTheElephant");
     print_str("Stored PW 2", stored_passwords[1]);
 
-    ecall_add_password(initial_masterpw, "AlfredoTheSheep");
+    ecall_add_password(initial_masterpw, "BGTheBear");
     print_str("Stored PW 3", stored_passwords[2]);
 }
 
@@ -72,26 +71,12 @@ void ecall_add_password(const char *masterpw, const char *plaintext_pw) {
     }
 
     if (pw_count >= MAX_PASSWORDS) return;
-
     strncpy(stored_passwords[pw_count], plaintext_pw, PW_LEN - 1);
     pw_count++;
 }
 
-// Get and print all passwords
-void ecall_get_passwords(const char *masterpw) {
-    if (!verify_master_password(masterpw) && !debug) {
-        ocall_print("[Enclave] Error: Master password incorrect. Retrieval denied.");
-        return;
-    }
-
-    for (int i = 0; i < pw_count; ++i) {
-        ocall_print(stored_passwords[i]);
-    }
-}
-
-void ecall_get_passwords2(const char *masterpw, void *outp) {
+void ecall_get_passwords(const char *masterpw, void *outp) {
     struct my_struct *output = (struct my_struct *) outp;
-
     if (sgx_is_outside_enclave(output, sizeof(struct my_struct))) {
         s = *output;
     }
@@ -104,11 +89,11 @@ void ecall_get_passwords2(const char *masterpw, void *outp) {
     // Assume output->passwords is already allocated
     for (int i = 0; i < pw_count; ++i) {
         if (!sgx_is_outside_enclave(s.passwords[i], s.pw_len)) {
+            ocall_print_address("wrong pointer", s.passwords[i] );
             return; // attacker-provided pointer not safe
         }
         output->array_len = pw_count;
-        strncpy_s(output->passwords[i], output->pw_len, stored_passwords[i], output->pw_len - 1);
-    }
+        strncpy_s(s.passwords[i], s.pw_len, stored_passwords[i], s.pw_len - 1);    }
 }
 
 
@@ -118,7 +103,6 @@ void ecall_change_master_password(const char *old_masterpw, const char *new_mast
         ocall_print("[Enclave] Error: Master password incorrect. Change denied.");
         return;
     }
-
     hash_password(new_masterpw, &current_masterpw_hash);
     ocall_print("[Enclave] Master password changed.");
 }
@@ -129,9 +113,7 @@ void ecall_clear_all(const char *masterpw) {
         ocall_print("[Enclave] Error: Master password incorrect. Clear operation denied.");
         return;
     }
-
     memset(&current_masterpw_hash, 0, sizeof(current_masterpw_hash));
-
     for (int i = 0; i < MAX_PASSWORDS; ++i) {
        memset(stored_passwords[i], 0, PW_LEN);
     }
@@ -139,7 +121,4 @@ void ecall_clear_all(const char *masterpw) {
 
 }
 
-void ecall_set_debug(const char *str) {
-    strncpy_s(stored_passwords[4], PW_LEN, str, PW_LEN - 1);
-}
 

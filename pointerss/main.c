@@ -240,7 +240,7 @@ void* thread_B(void* arg) {
     ecall_compute_response(eidarg, 2, 4);
     char buffer[64];  // must be large enough to hold the secret or error message
     ecall_get_secret(eidarg, 8, buffer, sizeof(buffer));
-    printf("%s\n", buffer);
+    printf("EXPLOIT: %s\n", buffer);
 
 
     // CHANGE FROM THREAD B TO THREAD A

@@ -28,11 +28,9 @@ void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_print_address, (const char* str, uint64
 sgx_status_t ecall_setup(sgx_enclave_id_t eid);
 sgx_status_t ecall_add_password(sgx_enclave_id_t eid, const char* masterpw, const char* plaintext_pw);
 sgx_status_t ecall_change_master_password(sgx_enclave_id_t eid, const char* old_masterpw, const char* new_masterpw);
-sgx_status_t ecall_get_passwords2(sgx_enclave_id_t eid, const char* masterpw, void* output);
+sgx_status_t ecall_get_passwords(sgx_enclave_id_t eid, const char* masterpw, void* output);
 sgx_status_t ecall_init_master_password(sgx_enclave_id_t eid, const char* masterpw);
 sgx_status_t ecall_clear_all(sgx_enclave_id_t eid, const char* masterpw);
-sgx_status_t ecall_set_debug(sgx_enclave_id_t eid, const char* str);
-sgx_status_t ecall_get_debug(sgx_enclave_id_t eid, int* retval);
 
 #ifdef __cplusplus
 }
