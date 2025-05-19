@@ -3,3 +3,4 @@
 sgx-tutorial-space18/
 sgx-step/
 **/*.o
+venv/

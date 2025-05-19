@@ -65,11 +65,33 @@ static sgx_status_t SGX_CDECL sgx_ecall_update_response_loc(void* pms)
 	}
 	sgx_status_t status = SGX_SUCCESS;
 	struct my_struct* _tmp_input_pointer = __in_ms.ms_input_pointer;
+	size_t _len_input_pointer = sizeof(struct my_struct);
+	struct my_struct* _in_input_pointer = NULL;
 
+	CHECK_UNIQUE_POINTER(_tmp_input_pointer, _len_input_pointer);
 
-	ecall_update_response_loc(_tmp_input_pointer);
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
 
+	if (_tmp_input_pointer != NULL && _len_input_pointer != 0) {
+		_in_input_pointer = (struct my_struct*)malloc(_len_input_pointer);
+		if (_in_input_pointer == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
 
+		if (memcpy_s(_in_input_pointer, _len_input_pointer, _tmp_input_pointer, _len_input_pointer)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+
+	}
+	ecall_update_response_loc(_in_input_pointer);
+
+err:
+	if (_in_input_pointer) free(_in_input_pointer);
 	return status;
 }
 

