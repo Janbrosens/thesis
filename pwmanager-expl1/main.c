@@ -71,7 +71,7 @@ void aep_cb_func(void)
     info("^^ enclave RIP=%#llx", erip);
 
     
-    if(erip == 0x33a5){ // logout between line 38 and 39
+    if(step_cnt== 912){ // logout between line 38 and 39
         info("testreach");
         sgx_step_do_trap = 0;
 
@@ -83,12 +83,6 @@ void aep_cb_func(void)
             pthread_cond_wait(&cond, &lock);
         }
         pthread_mutex_unlock(&lock); //end turn of thread A
-
-    }
-
-    if(erip == 0x2084){ 
-        info("testjaper2");
-       
 
     }
 

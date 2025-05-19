@@ -43,9 +43,9 @@ void* sha_page_start;
 
 
  static char password1[64] = "password1";
-    static char password2[64] = "password2";
-    static char password3[64] = "password3";
-    static char password4[64] = "password4";
+static char password2[64] = "password2";
+static char password3[64] = "password3";
+static char password4[64] = "password4";
 
     
 sgx_enclave_id_t create_enclave(void)
@@ -87,7 +87,7 @@ void aep_cb_func(void)
     info("^^ enclave RIP=%#llx", erip);
 
     
-    if(erip == 0x32c9){ // logout between line 38 and 39
+    if(step_cnt == 974){ // logout between line 38 and 39
         info("testreach");
         sgx_step_do_trap = 0;
         single_stepping = 0;
