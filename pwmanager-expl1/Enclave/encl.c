@@ -82,7 +82,6 @@ void ecall_get_passwords(const char *masterpw, void *outp) {
     }
     
     if (!verify_master_password(masterpw) && !debug) {
-        output->array_len = 0;
         return;
     }
     
@@ -92,9 +91,9 @@ void ecall_get_passwords(const char *masterpw, void *outp) {
             ocall_print_address("wrong pointer", s.passwords[i] );
             return; // attacker-provided pointer not safe
         }
-        output->array_len = pw_count;
-        strncpy_s(s.passwords[i], s.pw_len, stored_passwords[i], s.pw_len - 1);    }
+        strncpy(s.passwords[i], stored_passwords[i], s.pw_len - 1);    }
 }
+
 
 
 // Change the master password
