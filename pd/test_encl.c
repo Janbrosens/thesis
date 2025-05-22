@@ -116,16 +116,11 @@ void __attribute__((noinline)) ecall_get_passwords( pw_struct_t *output) {
     }
     s = *output;
     
-    /*
-    if (!verify_master_password(masterpw) && !debug) {
-        output->array_len = 0;
-        return;
-    }*/
+  
     
     // Assume output->passwords is already allocated
     for (int i = 0; i < pw_count; ++i) {
         if (!sgx_is_outside_enclave(s.passwords[i], s.pw_len)) {
-            //ocall_print_address("wrong pointer", s.passwords[i] );
             return; // attacker-provided pointer not safe
         }
         strncpy(s.passwords[i], stored_passwords[i], s.pw_len - 1);    
