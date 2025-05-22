@@ -2,24 +2,6 @@
 /*  Copyright(c) 2016-20 Intel Corporation. */
 
 #include <stddef.h>
-#include "defines.h"
-
-/*
- * Data buffer spanning two pages that will be placed first in .data
- * segment. Even if not used internally the second page is needed by
- * external test manipulating page permissions.
- */
-
-/*
- * Unmeasured data buffer in enclave for testing purposes. This is allocated in
- * a separate .unmeasured section, so as to allow the LinuxSelftestEnclave
- * loader to recognize this as such and mark it as _unmeasured_ SGX memory for
- * Pandora symbolic exploration. Allows testing vulnerabilities where
- * unmeasured enclave memory is accessed before secure initialization.
- */
-extern volatile uint8_t unmeasured_encl_buffer[100];
-
-volatile uint8_t non_exec_data_buffer[10] = { 0xc3 /* x86 ret instruction */ };
 
 // sgx_is_outside_enclave()
 // Parameters:
@@ -53,54 +35,110 @@ int sgx_is_outside_enclave(const void *addr, size_t size)
     }
     return 0;
 }
+char *strncpy(char *dest, const char *src, size_t n) {
+    size_t i = 0;
+    for (; i < n && src[i] != '\0'; ++i)
+        dest[i] = src[i];
+    for (; i < n; ++i)
+        dest[i] = '\0';
+    return dest;
+}
 
-
-
-struct my_struct {
+typedef struct my_struct {
     int* sump;
     int* prodp;
-} msp;
+} my_struct_t;
 
-static void ecall_update_response_loc(void* op) {
-    struct my_struct* input_pointer = op;
-    if (sgx_is_outside_enclave(input_pointer, sizeof(struct my_struct))) {
-        msp = *input_pointer; 
-        
-        if (!(sgx_is_outside_enclave(msp.sump, sizeof(int)) && sgx_is_outside_enclave(msp.prodp,  sizeof(int)))) {
-                msp.sump = NULL;
-                msp.prodp = NULL;
-            }
-        
+my_struct_t msp = {
+    .sump = NULL,
+    .prodp = NULL
+};
+
+typedef struct ecr_struct{
+    int i;
+    int j;
+} ecr_struct_t;
+
+typedef struct pw_struct{
+    char *passwords[10];
+    int array_len;
+    int pw_len;
+}pw_struct_t;
+
+pw_struct_t s = {
+    .passwords = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
+    .array_len = 0,
+    .pw_len = 0
+};
+
+void __attribute__((noinline)) ecall_update_response_loc(my_struct_t* input_pointer){
+
+    /* 1. copy input_pointer struct inside */
+    if (!(sgx_is_outside_enclave(input_pointer, sizeof(my_struct_t))))
+        return;
+
+    msp = *input_pointer; 
+     
+    if (!(sgx_is_outside_enclave(msp.sump, sizeof(int)) &&
+          sgx_is_outside_enclave(msp.prodp,  sizeof(int))))
+    {
+        msp.sump = NULL;
+        msp.prodp = NULL;
     }
-
 }
+
+void __attribute__((noinline)) ecall_compute_response(ecr_struct_t *ops)
+{
+    if (!(sgx_is_outside_enclave(ops, sizeof(ecr_struct_t))))
+        return;
+
+    int i = ops->i;
+    int j = ops->j;
+
+    if( (msp.sump != NULL) && (msp.prodp != NULL)){
+        *(msp.sump) = i + j;
+        *(msp.prodp) = i * j;
+    }
+}
+
+int pw_count = 5;
+char stored_passwords[5][32] = {
+    "password1",
+    "123456",
+    "admin",
+    "letmein",
+    "default"
+};
+
+void __attribute__((noinline)) ecall_get_passwords( pw_struct_t *output) {
+    if (!sgx_is_outside_enclave(output, sizeof(pw_struct_t))) {
+        return;
+    }
+    s = *output;
+    
+    /*
+    if (!verify_master_password(masterpw) && !debug) {
+        output->array_len = 0;
+        return;
+    }*/
+    
+    // Assume output->passwords is already allocated
+    for (int i = 0; i < pw_count; ++i) {
+        if (!sgx_is_outside_enclave(s.passwords[i], s.pw_len)) {
+            //ocall_print_address("wrong pointer", s.passwords[i] );
+            return; // attacker-provided pointer not safe
+        }
+        strncpy(s.passwords[i], stored_passwords[i], s.pw_len - 1);    
+    }
+}
+
+
+
+
 
 void encl_body(void *rdi,  void *rsi)
 {
-    const void (*encl_op_array[ENCL_OP_MAX])(void *) = {
-    	ecall_update_response_loc
-    	
-    };
-    
-    struct encl_op_header *op = (struct encl_op_header *)rdi;
-    
-    // 1. check if the argument struct header lies entirely outside 
-    #if FIX_SANITIZATION >= 1
-        // NOTE: this is necessary but not sufficient (as subsequent
-         // operations will dereference further offsets) 
-        if (!sgx_is_outside_enclave(op, sizeof(struct encl_op_header)))
-            return;
-    #endif
-
-    // 2. copy the untrusted array idx inside the enclave to protect against TOCTOU attacks 
-    #if FIX_SANITIZATION >= 2
-        volatile uint64_t op_type = op->type;
-    #else
-        #define op_type (op->type)
-    #endif
-
-    if (op_type < ENCL_OP_MAX)
-    {
-        (*(encl_op_array[op_type] + (size_t) &__enclave_start))(op);
-    }
+    ecall_get_passwords(rdi);
+    ecall_update_response_loc(rdi);
+    ecall_compute_response(rsi);
 }
